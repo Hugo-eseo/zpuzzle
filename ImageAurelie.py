@@ -5,9 +5,13 @@ Created on Wed Jan 13 14:23:40 2021
 @author: odial
 """
 
-from PIL import Image
+from PIL import Image, ImageTk
+import tkinter as Tk
 import math
 
+win = Tk.Tk()
+
+'''
 image= Image.open("img_forest.jpg")
 ImageSize = image.size #ImageSize = (width, height) de image
 #Découpe image : Xgauche = 0, Yhaut = 0, Xdroite = 60, Ybas = 40
@@ -20,6 +24,7 @@ image.show()
 #ImageCrop.show()
 
 print(ImageSize[0]/ImageSize[1])
+'''
 
 class Photolmage:
     def __init__(self,image):
@@ -31,7 +36,6 @@ class Photolmage:
     def printSize(self):
         print(self.size , self.width, self.height)
         
-    def crop(self):
     def crop(self,TilesNumber):
         self.TilesNumber = TilesNumber
         tiles = list()
@@ -48,9 +52,32 @@ class Photolmage:
 #        tiles[0].show()
 #        tiles[99].show()
 #        print(coord)
-return tiles
+        return tiles
 
-image1 = Photolmage("img_forest.jpg") 
-#image1 = Photolmage("ImageMario.png")
+image1 = Photolmage("img_forest.jpg")
 image1.printSize()
-image1.crop(100)
+tiles = image1.crop(10)
+
+
+image1.printSize()
+
+'''
+image1Tk = ImageTk.PhotoImage(image1.image)
+label = Tk.Label(image=image1Tk)
+label.image = image1Tk
+label.pack()
+'''
+win.geometry("1000x500")
+
+for i in tiles : 
+    tileTk = ImageTk.PhotoImage(i)
+    win.label = Tk.Label(image=tileTk)
+    win.label.image = tileTk
+    win.label.pack(side=Tk.LEFT, anchor=Tk.NW)
+    
+    
+win.mainloop()  
+
+
+
+    
