@@ -8,25 +8,9 @@ Created on Wed Jan 13 14:23:40 2021
 from PIL import Image, ImageTk
 import tkinter as Tk
 import math
+import random
 
-win = Tk.Tk()
-
-'''
-image= Image.open("img_forest.jpg")
-ImageSize = image.size #ImageSize = (width, height) de image
-#Découpe image : Xgauche = 0, Yhaut = 0, Xdroite = 60, Ybas = 40
-ImageCrop = image.crop((0,0,60,40))  
-
-
-print(image.format, image.size, image.mode)
-print (ImageCrop.format,ImageCrop.size,ImageCrop.mode)
-image.show()
-#ImageCrop.show()
-
-print(ImageSize[0]/ImageSize[1])
-'''
-
-class Photolmage:
+class ImagePuzzle:
     def __init__(self,image):
         self.image = Image.open(image)
         self.size = self.image.size
@@ -34,12 +18,11 @@ class Photolmage:
         self.height = self.size[1]
     
     def printSize(self):
-        print(self.size , self.width, self.height)
+        print(self.size, self.width, self.height)
         
     def crop(self,TilesNumber):
         self.TilesNumber = TilesNumber
         tiles = list()
-#        coord = list()
         for i in range(int(math.sqrt(TilesNumber))):
             for j in range(int(math.sqrt(TilesNumber))):
                 left = i * (self.width // math.sqrt(TilesNumber))
@@ -53,30 +36,57 @@ class Photolmage:
 #        tiles[99].show()
 #        print(coord)
         return tiles
-
-image1 = Photolmage("img_forest.jpg")
-image1.printSize()
-tiles = image1.crop(10)
-
-
-image1.printSize()
-
-'''
-image1Tk = ImageTk.PhotoImage(image1.image)
-label = Tk.Label(image=image1Tk)
-label.image = image1Tk
-label.pack()
-'''
-win.geometry("1000x500")
-
-for i in tiles : 
-    tileTk = ImageTk.PhotoImage(i)
-    win.label = Tk.Label(image=tileTk)
-    win.label.image = tileTk
-    win.label.pack(side=Tk.LEFT, anchor=Tk.NW)
     
-    
-win.mainloop()  
+    def display(self, tiles, window, windowWidth, windowHeight):
+        self.tiles, self.window = tiles, window
+        self.windowWidth = windowWidth
+        self.windowHeight = windowHeight
+        numberTiles = len(tiles)
+        imgWidth, imgHeight = 45,30
+        widthNeeded = numberTiles * imgWidth + imgWidth*1.5+(numberTiles-1)*(imgWidth/2)
+        
+        numberLines = widthNeeded / 1500
+        print(numberLines, type(numberLines))
+        if (type(numberLines) != int): 
+            numberLines = int(numberLines)+1
+        print(numberLines, type(numberLines))
+        
+        cnvHeight = imgHeight + (numberLines-1)*imgHeight*0.5 + numberLines*imgHeight
+        print(cnvHeight)
+        cnv = Tk.Canvas(self.window, height=cnvHeight, bg='light grey')
+        cnv.pack(side=Tk.TOP, fill = Tk.X)
+        
+        
+        tileTk=list()
+        for i in self.tiles : 
+            tileTk.append(ImageTk.PhotoImage(i.resize((imgWidth,imgHeight))))
+        random.shuffle(tileTk)
+            
+        x, y = imgWidth*1.5, imgHeight
+        for i in range(len(tileTk)):
+            if x+imgWidth > self.windowWidth :
+                y+= imgHeight*1.5
+                x=imgWidth*1.5
+            cnv.create_image(x, y, image=tileTk[i])  
+            x += imgWidth*1.5
+        win.mainloop() 
+
+
+#####
+win = Tk.Tk()
+win.geometry("1500x700")
+image1 = ImagePuzzle("img_forest.jpg")
+image1.printSize()
+
+numberTiles = 49 #la racine carrée doit être un nombre entier
+tiles = image1.crop(numberTiles)
+print(len(tiles))
+
+
+image1.display(tiles,win,1500,700)
+####
+
+ 
 
 
 
