@@ -6,7 +6,6 @@ Created on Wed Jan 13 14:29:46 2021
 """
 
 import tkinter as tk
-from operator import itemgetter, attrgetter
 
 class Application():
     '''Contients des objets correspondant à une fenêtre de jeu'''
@@ -84,16 +83,16 @@ class Application():
         '''Retourne l'objet si le clic a été effectué sur un objet déplacable. Retourne False sinon'''
         self.objectList.sort(key=lambda e: (e.x, e.y))
         for i in range (len(self.objectList)):
-            if (x>=self.objectList[i].x) and (x<=self.objectList[i].x + self.pcW):
-                if (y>=self.objectList[i].y) and (y<=self.objectList[i].y + self.pcH):
+            if (x >= self.objectList[i].x) and (x <= self.objectList[i].x + self.pcW):
+                if (y >= self.objectList[i].y) and (y <= self.objectList[i].y + self.pcH):
                     return(self.objectList[i])
         return False
         
 class ObjectCanvas():
     '''Contients les caractéristiques d'objets du canvas'''
     def __init__(self, x, y, tag):
-        '''Mémorise les caractéristique de l'objet :
-            x, y : coordonnée du coin supérieur gauche
+        '''Mémorise les caractéristiques de l'objet :
+            x, y : coordonnées du coin supérieur gauche
             tag : tag de l'objet dans le canvas'''
         self.x, self.y, self.tag = x, y, tag
         
