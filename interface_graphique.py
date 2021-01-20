@@ -62,14 +62,16 @@ class Application():
         self.wnd.mainloop()
         
     def test(self,event):
-        print("Cool")
+        print("Done")
         
     def getCords(self,event):
+        '''Mémorise l'objet sélectionné'''
         self.object = self.findObject(event.x,event.y)
         '''for i in range (len(self.objectList)):
             print(self.objectList[i])'''
                
     def moveImage(self, event):
+        '''Déplace l'objet séléctionné dans le canvas'''
         if (self.object == False):
             return
         difx = - (self.object.x-event.x)
@@ -79,33 +81,13 @@ class Application():
         self.cnv.move(self.object.tag, difx, dify)
         
     def findObject(self, x, y):
-        '''Retourne le tag et la position dans le tableau de l'objet si le clic
-        a été effectué sur un objet déplacable. Retourne False sinon'''
+        '''Retourne l'objet si le clic a été effectué sur un objet déplacable. Retourne False sinon'''
         self.objectList.sort(key=lambda e: (e.x, e.y))
-        i = 0
-        print(x,y)
-        firstId = i
-        while ((i + 1) < len(self.objectList)):
-            if (self.objectList[i].x == self.objectList[i+1].x):
-                i += 1
-            elif (x > self.objectList[i+1].x):
-                i += 1
-                firstId=i
-            else:
-                break
-        lastid = i
-        i = firstId
-        while (i < lastid):
-            if (y > self.objectList[i+1].y):
-                i += 1
-            else:
-                break
-        if (x < self.objectList[i].x) or (x > self.objectList[i].x + self.pcW):
-            return False
-        if (y < self.objectList[i].y) or (y > self.objectList[i].y + self.pcH):
-            return False
-        print("FIND",self.objectList[i])
-        return(self.objectList[i])
+        for i in range (len(self.objectList)):
+            if (x>=self.objectList[i].x) and (x<=self.objectList[i].x + self.pcW):
+                if (y>=self.objectList[i].y) and (y<=self.objectList[i].y + self.pcH):
+                    return(self.objectList[i])
+        return False
         
 class ObjectCanvas():
     '''Contients les caractéristiques d'objets du canvas'''
