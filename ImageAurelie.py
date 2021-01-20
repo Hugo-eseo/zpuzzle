@@ -12,9 +12,12 @@ import random
 
 class ImagePuzzle:
     def __init__(self,image):
-        '''Initiatilisation :
+        '''
+        Initiatilisation :
         self.image : image voulue
         self.size : tuple : (width,height)
+        self.wdith : longueur de l'image
+        self.height : hauteur de l'image'
         '''
         self.image = Image.open(image)
         self.size = self.image.size
@@ -22,77 +25,79 @@ class ImagePuzzle:
         self.height = self.size[1]
     
     def printSize(self):
-        print(self.size, self.width, self.height)
-        
-    def crop(self,TilesNumber):
-        self.TilesNumber = TilesNumber
+        '''Affiche les dimensions de l'image sous forme (width,height)'''
+        print(self.size)
+    def crop(self,tilesNumber):
+        '''
+        Découpage de l'image en fonction du nombre de tuiles souhaité
+        Retourne une liste des pièces
+        '''
+        self.tilesNumber = tilesNumber
         tiles = list()
-        for i in range(int(math.sqrt(TilesNumber))):
-            for j in range(int(math.sqrt(TilesNumber))):
-                left = i * (self.width // math.sqrt(TilesNumber))
-                top = j * self.height // math.sqrt(TilesNumber)
-                right = left + self.width // math.sqrt(TilesNumber) 
-                bottom = top + self.height // math.sqrt(TilesNumber)
+        #calcul du nombre de découpages en longueur et en hauteur
+        #exemple : si on veut 25 tuiles, on découpe 5 fois en longueur
+        #et 5 fois en hauteur
+        #comme ça : 5*5 =25 et on a bien le nombre de tuiles souhaité
+        dim = int(math.sqrt(self.tilesNumber)) #int est une sécurité
+        for i in range(dim):
+            for j in range(dim):
+                #calcul des coordonnées du rectangle que l'on veut découper
+                #de l'image
+                left = i * (self.width // dim)
+                top = j * (self.height // dim)
+                right = left + self.width // dim 
+                bottom = top + self.height // dim
                 tile = self.image.crop((left, top, right, bottom))
                 tiles.append(tile)
-#                coord.append((left, top, right, bottom))
-#        tiles[0].show()
-#        tiles[99].show()
-#        print(coord)
         return tiles
     
-    def display(self, tiles, window, windowWidth, windowHeight, pieceWidth, pieceHeight):
-        self.tiles, self.window = tiles, window
-        self.windowWidth = windowWidth
-        self.windowHeight = windowHeight
+    def createTilesTk(self, tiles, pieceWidth, pieceHeight):
+        '''
+        Création de la liste d'images de Tkinter en fonction de longueur et
+        de la hauteur d'une pièce souhaitée
+        self.tiles : liste d'image non converties pour Tkinter
+        pieceWidth, pieceHeight : longueur et hauteur souhaitées de chaque 
+        pièce
+        Retourne une liste d'images utilisables dans Tkinter'
+        '''
+        self.tiles = tiles
         self.pieceWidth = pieceWidth
         self.pieceHeight = pieceHeight
-        numberTiles = len(tiles)
-        #pieceWidth, pieceHeight = self.width//math.sqrt(numberTiles), self.height//math.sqrt(numberTiles)
-        widthNeeded = numberTiles * pieceWidth + pieceWidth*1.5+(numberTiles-1)*(pieceWidth/2)
-        
-        numberLines = widthNeeded / 1500
-        if (type(numberLines) != int): 
-            numberLines = int(numberLines)+1
-        
-        cnvHeight = pieceHeight + (numberLines-1)*pieceHeight*0.5 + numberLines*pieceHeight
-        cnv = Tk.Canvas(self.window, height=cnvHeight, bg='light grey')
-        cnv.pack(side=Tk.TOP, fill = Tk.X)
         
         tileTk=list()
         for i in self.tiles : 
+            #resize ne modifie pas l'image si pieceWidth et pieceHeigt
+            #sont déjà la vraie longueur et la vraie hauteur d'une pièce
             tileTk.append(ImageTk.PhotoImage(i.resize((pieceWidth,pieceHeight))))
-        random.shuffle(tileTk)
-            
-        x, y = pieceWidth*1.5, pieceHeight
+        random.shuffle(tileTk) #mélange de l'ordre des pièces
+        return tileTk   
+      
+        '''
+        x, y = coinHautGaucheX, coinHautGaucheY)
         nbt = 1
         for i in range(len(tileTk)):
-            if x+pieceWidth > self.windowWidth :
-                y+= pieceHeight*1.5
-                x=pieceWidth*1.5
             tagt = 'tile' + str(nbt)
             cnv.create_image(x, y, image=tileTk[i], tag = tagt)  
-            x += pieceWidth*1.5
+            x, y +=...
             nbt += 1
-        win.mainloop() 
-
+        '''
 
 #####
 win = Tk.Tk()
-win.geometry("1500x700")
-image1 = ImagePuzzle("img2.jpg")
+image = ImagePuzzle("img2.jpg")
 numberTiles = 25 #la racine carrée doit être un nombre entier
-#pieceWidth, pieceHeight = 45,30
-pieceWidth = image1.width//math.sqrt(numberTiles)
-pieceHeight = image1.height//math.sqrt(numberTiles)
+#Taille mise par défaut pour la largeur et longueur d'une pièce
+# on peut mettre le nombre de pixels que l'on veut
+pieceWidth = image.width//math.sqrt(numberTiles)
+pieceHeight = image.height//math.sqrt(numberTiles)
 
-image1.printSize()
+image.printSize()
 
-tiles = image1.crop(numberTiles)
+tiles = image.crop(numberTiles)
 print(len(tiles))
 print(pieceWidth,pieceHeight)
 
-image1.display(tiles,win,1500,700,pieceWidth,pieceHeight)
+listTilesTk =  image.createTilesTk(tiles,pieceWidth,pieceHeight)
 ####
 
  
