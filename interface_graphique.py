@@ -28,14 +28,28 @@ class Application():
         self.frm = tk.Frame(self.wnd, width = self.width, height = 150)
         self.frm.pack(side=tk.BOTTOM)
         self.nbMove = tk.Label(self.frm, text='A déterminer')
-        self.nbMove.pack()
+        self.nbMove.pack(side = tk.RIGHT)
+        self.chrono = tk.Label(self.frm, text ='')
+        self.chrono.pack(side = tk.LEFT)
+        #Création des boutons
+        self.quit = tk.Button(self.frm, text='Quitter', 
+                              command=self.wnd.destroy)
+        self.quit.pack(side=tk.RIGHT, pady=5)
+        self.start = tk.Button(self.frm, text='Start',
+                               command=self.timer)
+        self.start.pack(side=tk.LEFT, pady=5)
+        #remise à zéro du chrono
+        self.error = False
+        self.cpt = 0
         self.wnd.mainloop()
         
-    def planche():
-        self.x=x
-        self
+    '''Fonction retournant le temps écoulé lors du jeu'''
+    def timer(self):
+        self.start.destroy()
+        if self.error == False:
+            self.cpt += 1
+        self.chrono.configure(text =('Temps:', self.cpt,'s'))
+        
     
+       
 a = Application(50, 300, 200, 6, 6)
-        
-        
-        
