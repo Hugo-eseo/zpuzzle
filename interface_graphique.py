@@ -6,6 +6,7 @@ Created on Wed Jan 13 14:29:46 2021
 """
 
 import tkinter as tk
+from operator import itemgetter, attrgetter
 
 class Application():
     '''Contients des objets correspondant à une fenêtre de jeu'''
@@ -37,21 +38,85 @@ class Application():
         self.nMove = tk.Label(self.frm, text = "N/A")
         self.nMove.pack()
         #Création des éléments de jeux
+        self.objectList=list() #On mémorise les caractéristques de chaque objet du canvas dans cette liste
         idP=0
         for i in range (self.nPcH):
             for j in range (self.nPcW):
                 #Création du plateau
                 x, y = i*self.pcW + self.margin, j*self.pcH + self.margin*2
                 self.cnv.create_rectangle(x, y, x + self.pcW, y + self.pcH)
+        for i in range (self.nPcH):
+            for j in range (self.nPcW):
                 #Affichage des images découpés
                 xi = self.pcW*self.nPcW + self.margin*2 + i*(self.pcW + self.margin/2)
                 yi = j*(self.pcH + self.margin/2) + self.margin
-                self.cnv.create_rectangle(xi, yi, xi + self.pcW, yi + self.pcH, fill='red',tag="P"+str(idP))
+                tag="Object"+str(idP)
+                self.cnv.create_rectangle(xi, yi, xi + self.pcW, yi + self.pcH, fill='red', tag=tag)
+                #ATTENTION SUITE A MERGE SUR LE MAIN
+                #Sauvegarde les coordonées et l'id de l'objet pour déplacement ultérieur
+                self.objectList.append(ObjectCanvas(xi, yi, tag))
                 idP+=1
+        self.cnv.bind('<Button-1>',self.getCords)
         self.cnv.bind('<B1-Motion>', self.moveImage)
+        self.cnv.bind('<ButtonRelease-1>', self.test)
         self.wnd.mainloop()
         
+    def test(self,event):
+        print("Cool")
+        
+    def getCords(self,event):
+        self.object = self.findObject(event.x,event.y)
+        '''for i in range (len(self.objectList)):
+            print(self.objectList[i])'''
+               
     def moveImage(self, event):
-        print(event.x,",",event.y)
+        if (self.object == False):
+            return
+        difx = - (self.object.x-event.x)
+        dify = - (self.object.y-event.y)
+        self.object.x = event.x
+        self.object.y = event.y
+        self.cnv.move(self.object.tag, difx, dify)
+        
+    def findObject(self, x, y):
+        '''Retourne le tag et la position dans le tableau de l'objet si le clic
+        a été effectué sur un objet déplacable. Retourne False sinon'''
+        self.objectList.sort(key=lambda e: (e.x, e.y))
+        i = 0
+        print(x,y)
+        firstId = i
+        while ((i + 1) < len(self.objectList)):
+            if (self.objectList[i].x == self.objectList[i+1].x):
+                i += 1
+            elif (x > self.objectList[i+1].x):
+                i += 1
+                firstId=i
+            else:
+                break
+        lastid = i
+        i = firstId
+        while (i < lastid):
+            if (y > self.objectList[i+1].y):
+                i += 1
+            else:
+                break
+        if (x < self.objectList[i].x) or (x > self.objectList[i].x + self.pcW):
+            return False
+        if (y < self.objectList[i].y) or (y > self.objectList[i].y + self.pcH):
+            return False
+        print("FIND",self.objectList[i])
+        return(self.objectList[i])
+        
+class ObjectCanvas():
+    '''Contients les caractéristiques d'objets du canvas'''
+    def __init__(self, x, y, tag):
+        '''Mémorise les caractéristique de l'objet :
+            x, y : coordonnée du coin supérieur gauche
+            tag : tag de l'objet dans le canvas'''
+        self.x, self.y, self.tag = x, y, tag
+        
+    def __str__(self):
+        r = str(self.x) + ', ' + str(self.y) + ', tag=' + str(self.tag)
+        return r
         
 boite=Application(50, 100, 100, 5, 5)
