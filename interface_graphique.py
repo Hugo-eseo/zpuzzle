@@ -37,6 +37,7 @@ class Application():
         self.nMove = tk.Label(self.frm, text = "N/A")
         self.nMove.pack()
         #Création des éléments de jeux
+        idP=0
         for i in range (self.nPcH):
             for j in range (self.nPcW):
                 #Création du plateau
@@ -45,7 +46,12 @@ class Application():
                 #Affichage des images découpés
                 xi = self.pcW*self.nPcW + self.margin*2 + i*(self.pcW + self.margin/2)
                 yi = j*(self.pcH + self.margin/2) + self.margin
-                self.cnv.create_rectangle(xi, yi, xi + self.pcW, yi + self.pcH, fill='red')
+                self.cnv.create_rectangle(xi, yi, xi + self.pcW, yi + self.pcH, fill='red',tag="P"+str(idP))
+                idP+=1
+        self.cnv.bind('<B1-Motion>', self.moveImage)
         self.wnd.mainloop()
+        
+    def moveImage(self, event):
+        print(event.x,",",event.y)
         
 boite=Application(50, 100, 100, 5, 5)
