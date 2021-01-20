@@ -46,10 +46,13 @@ class Application():
     '''Fonction retournant le temps écoulé lors du jeu'''
     def timer(self):
         self.start.destroy()
+        self.m = int((self.cpt)/60)
+        self.s = int((self.cpt) - (60 * self.m))
         if self.error == False:
             self.cpt += 1
-        self.chrono.configure(text =('Temps:', self.cpt,'s'))
-        
+            self.chrono.configure(text =('Temps:', self.cpt,'s'))
+            if self.cpt >= 60:
+                self.chrono.configure(text =('Temps:', self.m,'m', self.s,'s'))
     
        
 a = Application(50, 300, 200, 6, 6)
