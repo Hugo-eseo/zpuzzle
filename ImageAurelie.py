@@ -12,6 +12,10 @@ import random
 
 class ImagePuzzle:
     def __init__(self,image):
+        '''Initiatilisation :
+        self.image : image voulue
+        self.size : tuple : (width,height)
+        '''
         self.image = Image.open(image)
         self.size = self.image.size
         self.width = self.size[0]
@@ -37,53 +41,58 @@ class ImagePuzzle:
 #        print(coord)
         return tiles
     
-    def display(self, tiles, window, windowWidth, windowHeight):
+    def display(self, tiles, window, windowWidth, windowHeight, pieceWidth, pieceHeight):
         self.tiles, self.window = tiles, window
         self.windowWidth = windowWidth
         self.windowHeight = windowHeight
+        self.pieceWidth = pieceWidth
+        self.pieceHeight = pieceHeight
         numberTiles = len(tiles)
-        imgWidth, imgHeight = 45,30
-        widthNeeded = numberTiles * imgWidth + imgWidth*1.5+(numberTiles-1)*(imgWidth/2)
+        #pieceWidth, pieceHeight = self.width//math.sqrt(numberTiles), self.height//math.sqrt(numberTiles)
+        widthNeeded = numberTiles * pieceWidth + pieceWidth*1.5+(numberTiles-1)*(pieceWidth/2)
         
         numberLines = widthNeeded / 1500
-        print(numberLines, type(numberLines))
         if (type(numberLines) != int): 
             numberLines = int(numberLines)+1
-        print(numberLines, type(numberLines))
         
-        cnvHeight = imgHeight + (numberLines-1)*imgHeight*0.5 + numberLines*imgHeight
-        print(cnvHeight)
+        cnvHeight = pieceHeight + (numberLines-1)*pieceHeight*0.5 + numberLines*pieceHeight
         cnv = Tk.Canvas(self.window, height=cnvHeight, bg='light grey')
         cnv.pack(side=Tk.TOP, fill = Tk.X)
         
-        
         tileTk=list()
         for i in self.tiles : 
-            tileTk.append(ImageTk.PhotoImage(i.resize((imgWidth,imgHeight))))
+            tileTk.append(ImageTk.PhotoImage(i.resize((pieceWidth,pieceHeight))))
         random.shuffle(tileTk)
             
-        x, y = imgWidth*1.5, imgHeight
+        x, y = pieceWidth*1.5, pieceHeight
+        nbt = 1
         for i in range(len(tileTk)):
-            if x+imgWidth > self.windowWidth :
-                y+= imgHeight*1.5
-                x=imgWidth*1.5
-            cnv.create_image(x, y, image=tileTk[i])  
-            x += imgWidth*1.5
+            if x+pieceWidth > self.windowWidth :
+                y+= pieceHeight*1.5
+                x=pieceWidth*1.5
+            tagt = 'tile' + str(nbt)
+            cnv.create_image(x, y, image=tileTk[i], tag = tagt)  
+            x += pieceWidth*1.5
+            nbt += 1
         win.mainloop() 
 
 
 #####
 win = Tk.Tk()
 win.geometry("1500x700")
-image1 = ImagePuzzle("img_forest.jpg")
+image1 = ImagePuzzle("img2.jpg")
+numberTiles = 25 #la racine carrée doit être un nombre entier
+#pieceWidth, pieceHeight = 45,30
+pieceWidth = image1.width//math.sqrt(numberTiles)
+pieceHeight = image1.height//math.sqrt(numberTiles)
+
 image1.printSize()
 
-numberTiles = 49 #la racine carrée doit être un nombre entier
 tiles = image1.crop(numberTiles)
 print(len(tiles))
+print(pieceWidth,pieceHeight)
 
-
-image1.display(tiles,win,1500,700)
+image1.display(tiles,win,1500,700,pieceWidth,pieceHeight)
 ####
 
  
