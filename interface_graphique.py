@@ -44,8 +44,8 @@ class Application():
                 self.cnv.create_rectangle(x, y, x + self.pcW, y + self.pcH)
                 #Affichage des images découpés
                 xi = self.pcW*self.nPcW + self.margin*2 + i*(self.pcW + self.margin/2)
-                yi = j*(self.pcH+self.margin/2) + self.margin
-                self.cnv.create_rectangle(xi, yi, xi+self.pcW, yi+self.pcH, fill='red')
+                yi = j*(self.pcH + self.margin/2) + self.margin
+                self.cnv.create_rectangle(xi, yi, xi + self.pcW, yi + self.pcH, fill='red')
         self.wnd.mainloop()
         
 boite=Application(50, 100, 100, 5, 5)
