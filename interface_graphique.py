@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Jan 13 14:29:46 2021
+Created on Thu Jan 21 14:23:08 2021
 
-@author: hugob
+@author: hugo
 """
 
 import tkinter as tk
+import crop_image
+import math
 
 class Application():
     '''Contients des objets correspondant à une fenêtre de jeu'''
     frameHight=200 #Hauteur de la zone de commande
-    def __init__(self, margin, pcW, pcH, nPcW, nPcH):
+    def __init__(self, margin, pcW, pcH, nPcW, nPcH, image):
         '''Crée une fenêtre tkinter. Prend en paramètres :
             margin : marge autour du puzzle
             pcW : largueur de la pièce
@@ -30,6 +32,15 @@ class Application():
         self.cnv = tk.Canvas(self.wnd, width = self.width, height = self.height, 
             bg='white')
         self.cnv.pack(side = tk.TOP)
+        #Création des éléments servant pour l'image
+        numberTiles = self.nPcW * self.nPcH
+        tiles = image.crop(numberTiles)
+        listTilesTk =  image.createTilesTk(tiles,self.pcW,self.pcH)
+        matTilesTk = [[listTilesTk[i] 
+                       for i in range(j,
+                                      len(listTilesTk),
+                                      int(math.sqrt(len(listTilesTk))))]
+                       for j in range(0,int(math.sqrt(len(listTilesTk))))]
         #Création de la zone de commande du jeu
         self.frm = tk.Frame(self.wnd, height = self.frameHight, width = self.width)
         self.frm.pack_propagate(0)
@@ -53,7 +64,7 @@ class Application():
                 xi = self.pcW*self.nPcW + self.margin*2 + i*(self.pcW + self.margin/2)
                 yi = j*(self.pcH + self.margin/2) + self.margin
                 tag="Object"+str(idP)
-                self.cnv.create_rectangle(xi, yi, xi + self.pcW, yi + self.pcH, fill='red', tag=tag)
+                self.cnv.create_image(xi,yi, image = matTilesTk[i][j], tag=tag, anchor ='nw') 
                 #ATTENTION SUITE A MERGE SUR LE MAIN
                 #Sauvegarde les coordonées et l'id de l'objet pour déplacement ultérieur
                 self.objectList.append(ObjectCanvas(xi, yi, tag))
@@ -141,5 +152,6 @@ class ObjectCanvas():
     def __str__(self):
         r = str(self.x) + ', ' + str(self.y) + ', tag=' + str(self.tag)
         return r
-        
-boite=Application(50, 100, 100, 5, 5)
+    
+image = crop_image.ImagePuzzle("images\img_forest.jpg")
+boite=Application(50, 100, 100, 5, 5, image)
