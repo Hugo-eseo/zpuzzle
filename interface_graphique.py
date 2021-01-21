@@ -59,8 +59,10 @@ class Application():
                 self.objectList.append(ObjectCanvas(xi, yi, tag))
                 self.authorizedPos.append(ObjectCanvas(xi,yi,False))
                 idP+=1
+                #TEST
+                self.isClic=False
         self.cnv.bind('<Button-1>',self.getCords)
-        self.cnv.bind('<B1-Motion>', self.moveObject)
+        self.cnv.bind('<B1-Motion>', self.dragObject)
         self.cnv.bind('<ButtonRelease-1>', self.posObject)
         self.wnd.mainloop()
         
@@ -68,43 +70,53 @@ class Application():
         '''Une fois le clic utilisateur relaché, positionne l'objet sur un emplacement autorisé'''
         if (self.object == False):
             return
+        if self.isClic:
+            return
         for i in range (len(self.authorizedPos)):
             if (event.x >= self.authorizedPos[i].x) and (event.x <= self.authorizedPos[i].x + self.pcW):
                 if (event.y >= self.authorizedPos[i].y) and (event.y <= self.authorizedPos[i].y + self.pcH):
                     if not self.authorizedPos[i].tag:
                         break
                     #Si un la souris est sûr un emplacement autorisé, on ajuste la position de l'objet
-                    difx = - (self.object.x-self.authorizedPos[i].x)
-                    dify = - (self.object.y-self.authorizedPos[i].y)
-                    self.object.x = self.authorizedPos[i].x
-                    self.object.y = self.authorizedPos[i].y
-                    self.cnv.move(self.object.tag, difx, dify)
+                    self.moveObject(self.authorizedPos[i].x, self.authorizedPos[i].y)
                     self.authorizedPos[i].tag=False
                     return
         #Sinon l'objet retrouve sa position initiale.
-        difx = - (self.object.x-self.initPos.x)
-        dify = - (self.object.y-self.initPos.y)
-        self.object.x = self.initPos.x
-        self.object.y = self.initPos.y
-        self.cnv.move(self.object.tag, difx, dify)
+        self.moveObject(self.initPos.x, self.initPos.y)
         self.initPos.tag = False
+        
+    def dragObject(self,event):
+        if (self.object == False):
+            return
+        self.isClic=False
+        self.moveObject(event.x, event.y)
+        self.initPos.tag = True
+        
         
     def getCords(self,event):
         '''Mémorise l'objet sélectionné'''
+        if self.isClic:
+            for i in range (len(self.authorizedPos)):
+                if (event.x >= self.authorizedPos[i].x) and (event.x <= self.authorizedPos[i].x + self.pcW):
+                    if (event.y >= self.authorizedPos[i].y) and (event.y <= self.authorizedPos[i].y + self.pcH):
+                        if not self.authorizedPos[i].tag:
+                            break
+                        #Si un la souris est sûr un emplacement autorisé, on ajuste la position de l'objet
+                        self.moveObject(self.authorizedPos[i].x, self.authorizedPos[i].y)
+                        self.authorizedPos[i].tag=False
+                        self.initPos.tag = True
+                        return
         self.object,self.initPos = self.findObject(event.x,event.y)
         '''for i in range (len(self.objectList)):
             print(self.objectList[i])'''
                
-    def moveObject(self, event):
+    def moveObject(self, x, y):
         '''Déplace l'objet séléctionné dans le canvas'''
-        if (self.object == False):
-            return
-        difx = - (self.object.x-event.x)
-        dify = - (self.object.y-event.y)
-        self.object.x = event.x
-        self.object.y = event.y
+        difx = - (self.object.x-x)
+        dify = - (self.object.y-y)
+        self.object.x = x
+        self.object.y = y
         self.cnv.move(self.object.tag, difx, dify)
-        self.initPos.tag = True
         
     def findObject(self, x, y):
         '''Retourne l'objet et sa position si le clic a été effectué sur un objet déplacable. Retourne False sinon'''
@@ -114,6 +126,7 @@ class Application():
                     for j in range (len(self.authorizedPos)):
                         if (x >= self.authorizedPos[j].x) and (x <= self.authorizedPos[j].x + self.pcW):
                             if (y >= self.authorizedPos[j].y) and (y <= self.authorizedPos[j].y + self.pcH):
+                                self.isClic=True
                                 return(self.objectList[i], self.authorizedPos[j])
         return False, False
         
