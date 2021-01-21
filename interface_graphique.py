@@ -38,12 +38,15 @@ class Application():
         self.nMove.pack()
         #Création des éléments de jeux
         self.objectList=list() #On mémorise les caractéristques de chaque objet du canvas dans cette liste
+        self.authorizedPos=list() #On mémorise les emplacements autorisés des objets
         idP=0
         for i in range (self.nPcH):
             for j in range (self.nPcW):
                 #Création du plateau
                 x, y = i*self.pcW + self.margin, j*self.pcH + self.margin*2
                 self.cnv.create_rectangle(x, y, x + self.pcW, y + self.pcH)
+                #A MERGE :
+                self.authorizedPos.append(ObjectCanvas(x,y,True))
         for i in range (self.nPcH):
             for j in range (self.nPcW):
                 #Affichage des images découpés
@@ -54,22 +57,45 @@ class Application():
                 #ATTENTION SUITE A MERGE SUR LE MAIN
                 #Sauvegarde les coordonées et l'id de l'objet pour déplacement ultérieur
                 self.objectList.append(ObjectCanvas(xi, yi, tag))
+                self.authorizedPos.append(ObjectCanvas(xi,yi,False))
                 idP+=1
         self.cnv.bind('<Button-1>',self.getCords)
-        self.cnv.bind('<B1-Motion>', self.moveImage)
-        self.cnv.bind('<ButtonRelease-1>', self.test)
+        self.cnv.bind('<B1-Motion>', self.moveObject)
+        self.cnv.bind('<ButtonRelease-1>', self.posObject)
         self.wnd.mainloop()
         
-    def test(self,event):
-        print("Done")
+    def posObject(self,event):
+        '''Une fois le clic utilisateur relaché, positionne l'objet sur un emplacement autorisé'''
+        if (self.object == False):
+            return
+        for i in range (len(self.authorizedPos)):
+            if (event.x >= self.authorizedPos[i].x) and (event.x <= self.authorizedPos[i].x + self.pcW):
+                if (event.y >= self.authorizedPos[i].y) and (event.y <= self.authorizedPos[i].y + self.pcH):
+                    if not self.authorizedPos[i].tag:
+                        break
+                    #Si un la souris est sûr un emplacement autorisé, on ajuste la position de l'objet
+                    difx = - (self.object.x-self.authorizedPos[i].x)
+                    dify = - (self.object.y-self.authorizedPos[i].y)
+                    self.object.x = self.authorizedPos[i].x
+                    self.object.y = self.authorizedPos[i].y
+                    self.cnv.move(self.object.tag, difx, dify)
+                    self.authorizedPos[i].tag=False
+                    return
+        #Sinon l'objet retrouve sa position initiale.
+        difx = - (self.object.x-self.initPos.x)
+        dify = - (self.object.y-self.initPos.y)
+        self.object.x = self.initPos.x
+        self.object.y = self.initPos.y
+        self.cnv.move(self.object.tag, difx, dify)
+        self.initPos.tag = False
         
     def getCords(self,event):
         '''Mémorise l'objet sélectionné'''
-        self.object = self.findObject(event.x,event.y)
+        self.object,self.initPos = self.findObject(event.x,event.y)
         '''for i in range (len(self.objectList)):
             print(self.objectList[i])'''
                
-    def moveImage(self, event):
+    def moveObject(self, event):
         '''Déplace l'objet séléctionné dans le canvas'''
         if (self.object == False):
             return
@@ -78,19 +104,22 @@ class Application():
         self.object.x = event.x
         self.object.y = event.y
         self.cnv.move(self.object.tag, difx, dify)
+        self.initPos.tag = True
         
     def findObject(self, x, y):
-        '''Retourne l'objet si le clic a été effectué sur un objet déplacable. Retourne False sinon'''
-        self.objectList.sort(key=lambda e: (e.x, e.y))
+        '''Retourne l'objet et sa position si le clic a été effectué sur un objet déplacable. Retourne False sinon'''
         for i in range (len(self.objectList)):
             if (x >= self.objectList[i].x) and (x <= self.objectList[i].x + self.pcW):
                 if (y >= self.objectList[i].y) and (y <= self.objectList[i].y + self.pcH):
-                    return(self.objectList[i])
-        return False
+                    for j in range (len(self.authorizedPos)):
+                        if (x >= self.authorizedPos[j].x) and (x <= self.authorizedPos[j].x + self.pcW):
+                            if (y >= self.authorizedPos[j].y) and (y <= self.authorizedPos[j].y + self.pcH):
+                                return(self.objectList[i], self.authorizedPos[j])
+        return False, False
         
 class ObjectCanvas():
     '''Contients les caractéristiques d'objets du canvas'''
-    def __init__(self, x, y, tag):
+    def __init__(self, x, y, tag=False):
         '''Mémorise les caractéristiques de l'objet :
             x, y : coordonnées du coin supérieur gauche
             tag : tag de l'objet dans le canvas'''
