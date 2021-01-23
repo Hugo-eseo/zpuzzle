@@ -52,11 +52,35 @@ class Application():
 
         #Création de la zone de commande du jeu
         self.frm = tk.Frame(self.wnd, height = self.frameHight,
-            width = self.width)
+            width = self.width, bg='white')
         self.frm.pack_propagate(0)
         self.frm.pack(side=tk.BOTTOM, expand = True)
-        self.n_move = tk.Label(self.frm, text = "N/A")
-        self.n_move.pack()
+        
+        #Création de la fenêtre de réussite et de ses éléments
+        self.frmr = tk.Frame(self.wnd, height = (self.frameHight)/2, 
+                            width = (self.width)/2, bg='white')
+        self.total_attempt = tk.Label(self.frmr, text = 'Déplacements totaux: '
+                                      ,width = 10)
+
+        #Création des boutons
+        self.quit = tk.Button(self.frm, text='Quitter', #Bouton pour quitter
+                              command=self.wnd.destroy) 
+        self.quit.pack(side=tk.RIGHT, pady=5, padx=5)
+        self.start = tk.Button(self.frm, text='Start', command = self.timer)
+        self.start.pack(side=tk.TOP, pady=5, padx=5) #Bouton pour commencer à jouer
+        self.sc = tk.Label(self.frm, text = 'Votre score: ', width = 10)
+        self.sc.pack(side=tk.LEFT, pady=5, padx=5)
+        self.attempt = tk.Label(self.frm, text = 'Coups: ' , width = 20)
+        self.attempt.pack(side=tk.LEFT, pady=5, padx=5)
+        self.chrono = tk.Label(self.frm, text= 'Temps écoulé :', width = 10)
+        self.chrono.pack(side = tk.LEFT, pady=5, padx=5)
+        
+        #remise à zéro du chrono
+        self.sec = 0
+        self.verif = True
+        self.nb_coup = 3
+        self.score()
+        self.win()
 
         #Création des éléments de jeux
         #On mémorise les caractéristques de chaque objet déplacable du canvas
@@ -93,6 +117,28 @@ class Application():
         self.cnv.bind('<B1-Motion>', self.drag_clic)
         self.cnv.bind('<ButtonRelease-1>', self.release_clic)
         self.wnd.mainloop()
+
+    def timer(self):
+        """ Méthode permettant le suivi du temps écoulé après le lancement
+        du jeu """
+        if(self.verif == False):
+            self.sec += 1
+            self.chaine = 'Temps écoulé: ' + str(self.sec) +'s'
+            self.chrono.after(1000, self.timer)
+            self.chrono.config(text = self.chaine)
+            self.start.destroy()
+    
+    def score(self):
+        '''Méthode affichant le score du joueur'''
+        self.coup = 'Déplacements: ' + str(self.nb_coup)
+        self.attempt.config(text = self.coup)
+    
+    def win(self):
+        if (self.verif == True):
+            self.frmr.pack(side=tk.TOP)
+            self.total_attempt.config(text = 'Déplacements totaux:' + 
+                                      str(self.nb_coup))
+            self.total_attempt.pack(side=tk.TOP)
 
     '''
     Il existe deux modes de déplacement :
