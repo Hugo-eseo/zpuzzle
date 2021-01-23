@@ -56,84 +56,76 @@ class Application():
                 #Création du plateau
                 x, y = i*self.pcW + self.margin, j*self.pcH + self.margin*2
                 self.cnv.create_rectangle(x, y, x + self.pcW, y + self.pcH)
-                #A MERGE :
-                self.authorizedPos.append(ObjectCanvas(x,y,True))
+                #Sauvegarde les emplacement possibles
+                self.authorizedPos.append(PlaceCanvas(x,y,True))
         for i in range (self.nPcH):
             for j in range (self.nPcW):
                 #Affichage des images découpés
-                xi = self.pcW*self.nPcW + self.margin*2 + i*(self.pcW + self.margin/2)
+                xi = self.pcW*(self.nPcW) + self.margin*2 + i*(self.pcW + self.margin/2)
                 yi = j*(self.pcH + self.margin/2) + self.margin
                 tag="Object"+str(idP)
-                self.cnv.create_image(xi,yi, image = matTilesTk[i][j], tag=tag, anchor ='nw') 
-                #ATTENTION SUITE A MERGE SUR LE MAIN
-                #Sauvegarde les coordonées et l'id de l'objet pour déplacement ultérieur
-                self.objectList.append(ObjectCanvas(xi, yi, tag))
-                self.authorizedPos.append(ObjectCanvas(xi,yi,False))
+                self.cnv.create_image(xi + self.pcW/2, yi + self.pcH/2, image = matTilesTk[i][j], tag=tag)
+                #Sauvegarde les coordonées du coin supérieur gauche et l'id de l'objet pour déplacement ultérieur
+                self.objectList.append(ObjectCanvas(xi, yi, tag, xi, yi, len(self.authorizedPos)))
+                #Sauvegarde l'emplacement
+                self.authorizedPos.append(PlaceCanvas(xi,yi,False))
                 idP+=1
-                #TEST
-                self.status=0
-                self.isClic=False
-        self.cnv.bind('<Button-1>',self.getCords)
-        self.cnv.bind('<B1-Motion>', self.dragObject)
-        self.cnv.bind('<ButtonRelease-1>', self.posObject)
+        self.status=0
+        self.cnv.bind('<Button-1>',self.clic)
+        self.cnv.bind('<B1-Motion>', self.dragClic)
+        self.cnv.bind('<ButtonRelease-1>', self.releaseClic)
         self.wnd.mainloop()
         
+    '''
+    Il existe deux modes de déplacement :
+        Mode 1 : L'utilisateur clic une première fois sur un objet puis
+        une deuxième fois sur une case vide : l'objet se déplace.
+        Mode 2 : L'utlisateur clic sur un objet et le déplace avec sa
+        souris jusqu'à l'emplacement voulu. Mode dit "drag and drop".
+        
+    Les fonctions suivantes se basent sur le principe d'une machine à état
+    contrôlée par la variable self.status. Cette dernière, en fonction des
+    évènements, peut prendre plusieurs valeurs :
+        0 : Le programme est dans l'attente d'un nouveau clic
+        1 : Un clic a été détecté sur un objet valide, le programme attend
+        la suite des évènements.
+        2 : Le clic a été aussitôt relaché, mode de déplacement 1.
+        Le programme attend le prochain clic.
+        12 : La souris se déplace avec le clic maintenu, le programme
+        déplace l'objet sélectionné en temps réel et attend le relachement du
+        clic. Mode de déplacement 2.
+        
+    '''
         
     def clic(self,event):
+        '''Si un clic est détecté'''
         if self.status == 0:
-            self.status = 1            
-            pass
+            find, self.object = self.isObject(event.x,event.y)
+            if find:
+                self.status = 1
+                return
+                
+        elif self.status == 2:
+            self.finalPos(event.x, event.y)
+        
+        self.status = 0
     
     def dragClic(self,event):
-        pass
+        '''Si le clic est maintenu et la souris dépalcée'''
+        if self.status == 1:    
+            self.status = 12
+        if self.status == 12:
+            self.moveObject(event.x - self.pcW/2, event.y - self.pcH/2)
     
     def releaseClic(self,event):
-        pass
-        
-    def posObject(self,event):
-        '''Une fois le clic utilisateur relaché, positionne l'objet sur un emplacement autorisé'''
-        if (self.object == False):
-            return
-        if self.isClic:
-            return
-        for i in range (len(self.authorizedPos)):
-            if (event.x >= self.authorizedPos[i].x) and (event.x <= self.authorizedPos[i].x + self.pcW):
-                if (event.y >= self.authorizedPos[i].y) and (event.y <= self.authorizedPos[i].y + self.pcH):
-                    if not self.authorizedPos[i].tag:
-                        break
-                    #Si un la souris est sûr un emplacement autorisé, on ajuste la position de l'objet
-                    self.moveObject(self.authorizedPos[i].x, self.authorizedPos[i].y)
-                    self.authorizedPos[i].tag=False
-                    return
-        #Sinon l'objet retrouve sa position initiale.
-        self.moveObject(self.initPos.x, self.initPos.y)
-        self.initPos.tag = False
-        
-    def dragObject(self,event):
-        if (self.object == False):
-            return
-        self.isClic=False
-        self.moveObject(event.x, event.y)
-        self.initPos.tag = True
-        
-        
-    def getCords(self,event):
-        '''Mémorise l'objet sélectionné'''
-        if self.isClic:
-            for i in range (len(self.authorizedPos)):
-                if (event.x >= self.authorizedPos[i].x) and (event.x <= self.authorizedPos[i].x + self.pcW):
-                    if (event.y >= self.authorizedPos[i].y) and (event.y <= self.authorizedPos[i].y + self.pcH):
-                        if not self.authorizedPos[i].tag:
-                            break
-                        #Si un la souris est sûr un emplacement autorisé, on ajuste la position de l'objet
-                        self.moveObject(self.authorizedPos[i].x, self.authorizedPos[i].y)
-                        self.authorizedPos[i].tag=False
-                        self.initPos.tag = True
-                        return
-        self.object,self.initPos = self.findObject(event.x,event.y)
-        '''for i in range (len(self.objectList)):
-            print(self.objectList[i])'''
-               
+        '''Si le clic est relaché'''
+        if self.status == 1:
+            self.status = 2
+            
+        elif self.status == 12:
+            self.status = 0
+            self.finalPos(event.x, event.y)
+            
     def moveObject(self, x, y):
         '''Déplace l'objet séléctionné dans le canvas'''
         difx = - (self.object.x-x)
@@ -142,29 +134,66 @@ class Application():
         self.object.y = y
         self.cnv.move(self.object.tag, difx, dify)
         
-    def findObject(self, x, y):
-        '''Retourne l'objet et sa position si le clic a été effectué sur un objet déplacable. Retourne False sinon'''
+    def finalPos(self, x, y):
+        '''Déplace et ajuste si possible l'objet vers sa position finale'''
+        valid, place, i = self.validPos(x, y)
+        if valid:
+            self.adjustPos(place, i)
+        else:
+            self.returnObject()
+    
+    def isObject(self, x, y):
+        '''Retourne l'objet si le clic a été effectué sur un objet valide. Retourne False sinon'''
         for i in range (len(self.objectList)):
             if (x >= self.objectList[i].x) and (x <= self.objectList[i].x + self.pcW):
                 if (y >= self.objectList[i].y) and (y <= self.objectList[i].y + self.pcH):
-                    for j in range (len(self.authorizedPos)):
-                        if (x >= self.authorizedPos[j].x) and (x <= self.authorizedPos[j].x + self.pcW):
-                            if (y >= self.authorizedPos[j].y) and (y <= self.authorizedPos[j].y + self.pcH):
-                                self.isClic=True
-                                return(self.objectList[i], self.authorizedPos[j])
-        return False, False
+                    return(True, self.objectList[i])
+        return False, None
+    
+    def validPos(self, x, y):
+        '''Retourne true, l'emplcament et son index dans authorizedPos si ce dernier est valide, false sinon'''
+        for i in range (len(self.authorizedPos)):
+            if (x >= self.authorizedPos[i].x) and (x <= self.authorizedPos[i].x + self.pcW):
+                if (y >= self.authorizedPos[i].y) and (y <= self.authorizedPos[i].y + self.pcH):
+                    if self.authorizedPos[i].av:
+                        return True, self.authorizedPos[i], i
+        return False, None, None
+        
+    def adjustPos(self, place, i):
+        '''Ajuste l'objet à la case sur la souris'''
+        self.moveObject(place.x, place.y)
+        self.authorizedPos[self.object.initPlace].av = True
+        self.object.initx, self.object.inity = place.x, place.y
+        self.object.initPlace = i
+        place.av = False
+        
+    def returnObject(self):
+        '''Retourne l'objet à son emplacement inital (avant déplacement)'''
+        self.moveObject(self.object.initx, self.object.inity)
         
 class ObjectCanvas():
     '''Contients les caractéristiques d'objets du canvas'''
-    def __init__(self, x, y, tag=False):
+    def __init__(self, x, y, tag=False, initx=0, inity=0, initPlace=0):
         '''Mémorise les caractéristiques de l'objet :
             x, y : coordonnées du coin supérieur gauche
+            initx, inity : coordonnées initiales de l'objet avant déplacement
+            initPlace : indice de l'emplacement initial dans le tableau authorizedPos
             tag : tag de l'objet dans le canvas'''
         self.x, self.y, self.tag = x, y, tag
+        self.initx, self.inity, self.initPlace = initx, inity, initPlace
         
     def __str__(self):
+        '''Affiche les principales coordonnées de l'objet (utile pour debug)'''
         r = str(self.x) + ', ' + str(self.y) + ', tag=' + str(self.tag)
         return r
+    
+class PlaceCanvas():
+    '''Contients des emplacements possible de pièce de jeu sur le canvas'''
+    def __init__(self, x, y, availability):
+        '''Mémorise les caractéristiques de l'emplacement :
+            x, y : coordonnées du coin supérieur gauche
+            availability : si l'emplacement est disponible ou occupé par un objet'''
+        self.x, self.y, self.av = x, y, availability
     
 image = crop_image.ImagePuzzle("images\img_forest.jpg")
 boite=Application(50, 100, 100, 5, 5, image)
