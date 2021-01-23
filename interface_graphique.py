@@ -71,11 +71,24 @@ class Application():
                 self.authorizedPos.append(ObjectCanvas(xi,yi,False))
                 idP+=1
                 #TEST
+                self.status=0
                 self.isClic=False
         self.cnv.bind('<Button-1>',self.getCords)
         self.cnv.bind('<B1-Motion>', self.dragObject)
         self.cnv.bind('<ButtonRelease-1>', self.posObject)
         self.wnd.mainloop()
+        
+        
+    def clic(self,event):
+        if self.status == 0:
+            self.status = 1            
+            pass
+    
+    def dragClic(self,event):
+        pass
+    
+    def releaseClic(self,event):
+        pass
         
     def posObject(self,event):
         '''Une fois le clic utilisateur relaché, positionne l'objet sur un emplacement autorisé'''
