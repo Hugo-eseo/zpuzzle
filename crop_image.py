@@ -2,13 +2,7 @@
 """
 Created on Thu Jan 21 14:03:28 2021
 
-@author: odial
-"""
-
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Jan 13 14:29:46 2021
-@author: hugob
+@author: Groupe 3 : Aurélie, Tristan et Hugo BOUY
 """
 
 from PIL import Image, ImageTk
