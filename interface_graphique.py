@@ -29,30 +29,35 @@ class Application():
         self.frm.pack(side=tk.BOTTOM)
         self.nbMove = tk.Label(self.frm, text='A déterminer')
         self.nbMove.pack(side = tk.RIGHT)
-        self.chrono = tk.Label(self.frm, text ='')
-        self.chrono.pack(side = tk.LEFT)
         #Création des boutons
-        self.quit = tk.Button(self.frm, text='Quitter', 
+        self.quit = tk.Button(self.frm, text='Quitter', #bouton pour quitter
                               command=self.wnd.destroy)
         self.quit.pack(side=tk.RIGHT, pady=5)
-        self.start = tk.Button(self.frm, text='Start',
-                               command=self.timer)
-        self.start.pack(side=tk.LEFT, pady=5)
+        self.start = tk.Button(self.frm, text='Start', command = self.timer)
+        self.start.pack(side=tk.LEFT, pady=5) #bouton pour commencer à jouer
+        self.sc = tk.Label(self.frm, text = 'Votre score: ', width = 10)
+        self.long = tk.Label(self.frm, text = 'Temps:' , width = 10)
+        self.attempt = tk.Label(self.frm, text = 'Coups: ' , width = 10)
         #remise à zéro du chrono
-        self.error = False
-        self.cpt = 0
-        self.wnd.mainloop()
+        self.sec = 0
+        self.chrono = tk.Label(self.frm, text= 'Temps écoulé :' )
+        self.chrono.pack(side = tk.LEFT)
+        self.nbcoup = 3
         
-    '''Fonction retournant le temps écoulé lors du jeu'''
-    def timer(self):
+    def timer(self):      
+        """ Méthode permettant le suivi du temps écoulé après le lancement du jeu """
+        self.sec += 1
+        self.chaine = 'Temps écoulé: ' + str(self.sec)
+        self.chrono.after(1000, self.timer)
+        self.chrono.config(text = self.chaine)
         self.start.destroy()
-        self.m = int((self.cpt)/60)
-        self.s = int((self.cpt) - (60 * self.m))
-        if self.error == False:
-            self.cpt += 1
-            self.chrono.configure(text =('Temps:', self.cpt,'s'))
-            if self.cpt >= 60:
-                self.chrono.configure(text =('Temps:', self.m,'m', self.s,'s'))
-    
-       
+
+    def score(self):
+        '''Méthode affichant le score du joueur'''
+        if(self.sec == 10):
+            self.coup = 'Coups: ' + str(self.sec)
+            self.temps = 'Temps: ' + str(self.nbcoup)
+            self.attempt.config(text = self.coup)
+            self.long.config(text = self.temps)
+
 a = Application(50, 300, 200, 6, 6)
