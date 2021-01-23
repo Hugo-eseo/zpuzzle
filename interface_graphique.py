@@ -61,6 +61,8 @@ class Application():
         #Création des éléments de jeux
         #On mémorise les caractéristques de chaque objet déplacable du canvas
         self.object_list=list()
+        #Variable mémorisant l'objet en cours de déplacement
+        self.object = None
         #On mémorise les emplacements autorisés des objets
         self.authorized_pos=list()
         id_p=0
@@ -111,8 +113,7 @@ class Application():
         Le programme attend le prochain clic.
         12 : La souris se déplace avec le clic maintenu, le programme
         déplace l'objet sélectionné en temps réel et attend le relachement du
-        clic. Mode de déplacement 2.
-        
+        clic. Mode de déplacement 2.   
     '''
 
     def clic(self,event):
