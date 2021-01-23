@@ -7,6 +7,7 @@ Created on Thu Jan 21 14:23:08 2021
 
 import tkinter as tk
 import math
+import random
 
 import crop_image
 
@@ -42,21 +43,31 @@ class Application():
         self.cnv.pack(side = tk.TOP)
 
         #Création des éléments servant pour l'image
-        number_titles = self.n_pc_w * self.n_pc_h
-        tiles = image.crop(number_titles)
-        list_tiles_tk =  image.createTilesTk(tiles,self.pc_w,self.pc_h)
-        mat_tiles_tk = [[list_tiles_tk[i]
-            for i in range(j, len(list_tiles_tk),
-                int(math.sqrt(len(list_tiles_tk))))]
-            for j in range(0,int(math.sqrt(len(list_tiles_tk))))]
-
+        
+        #Récupération de la liste des tuiles de l'image
+        tiles = image.crop(self.n_pc_w * self.n_pc_h)
+        list_tiles =  image.createTilesTk(tiles, self.pc_w, self.pc_h)
+       
+        #Ajout d'un indice pour la vérification
+        self.list_tiles_i = [[list_tiles[i],i] for i in range (len(list_tiles))]
+        
+        #Mélange de la liste
+        #random.shuffle(self.list_tiles_i)
+        
+        #Conversion en matrice self.n_pc_w*self.n_pc_h
+        mat_tiles = [[[self.list_tiles_i[i][0],self.list_tiles_i[i][1]] \
+            for i in range (j, self.n_pc_w+j)]\
+            for j in range (0, self.n_pc_h*self.n_pc_w, self.n_pc_w)]
+        
+        
         #Création de la zone de commande du jeu
         self.frm = tk.Frame(self.wnd, height = self.frameHight,
             width = self.width)
         self.frm.pack_propagate(0)
         self.frm.pack(side=tk.BOTTOM, expand = True)
-        self.n_move = tk.Label(self.frm, text = "N/A")
-        self.n_move.pack()
+        
+        #TEMPORAIRE
+        tk.Button(self.frm, text='Soumettre', command=self.submit).pack()
 
         #Création des éléments de jeux
         #On mémorise les caractéristques de chaque objet déplacable du canvas
@@ -66,13 +77,16 @@ class Application():
         #On mémorise les emplacements autorisés des objets
         self.authorized_pos=list()
         id_p=0
+        k=0
         for i in range (self.n_pc_h):
             for j in range (self.n_pc_w):
                 #Création du plateau
                 x, y = i*self.pc_w + self.margin, j*self.pc_h + self.margin*2
                 self.cnv.create_rectangle(x, y, x + self.pc_w, y + self.pc_h)
                 #Sauvegarde les emplacement possibles
-                self.authorized_pos.append(PlaceCanvas(x,y,True))
+                self.authorized_pos.append(PlaceCanvas(x,y,None,k))
+                k+=1
+
         for i in range (self.n_pc_h):
             for j in range (self.n_pc_w):
                 #Affichage des images découpés
@@ -81,13 +95,13 @@ class Application():
                 yi = j*(self.pc_h + self.margin/2) + self.margin
                 tag="Object"+str(id_p)
                 self.cnv.create_image(xi + self.pc_w/2, yi + self.pc_h/2,
-                    image = mat_tiles_tk[i][j], tag=tag)
+                    image = mat_tiles[i][j][0], tag=tag)
                 #Sauvegarde les coordonées du coin supérieur gauche et
                 #l'id de l'objet pour déplacement ultérieur
                 self.object_list.append(ObjectCanvas(xi, yi, xi, yi,
-                    len(self.authorized_pos), tag))
+                    len(self.authorized_pos), tag, mat_tiles[i][j][1]))
                 #Sauvegarde l'emplacement
-                self.authorized_pos.append(PlaceCanvas(xi,yi,False))
+                self.authorized_pos.append(PlaceCanvas(xi,yi,mat_tiles[i][j][1]))
                 id_p+=1
 
         self.status=0
@@ -95,6 +109,14 @@ class Application():
         self.cnv.bind('<B1-Motion>', self.drag_clic)
         self.cnv.bind('<ButtonRelease-1>', self.release_clic)
         self.wnd.mainloop()
+        
+    def submit(self):
+        for k in range (25):
+            #print(self.list_tiles_i[k][1], ",", self.authorized_pos[k].ob)
+            if self.list_tiles_i[k][1] != self.authorized_pos[k].ob:
+                print("Lost !")
+                return
+        print("Won !")
 
     '''
     Il existe deux modes de déplacement :
@@ -180,17 +202,17 @@ class Application():
                 (x <= self.authorized_pos[i].x + self.pc_w):
                 if (y >= self.authorized_pos[i].y) and \
                     (y <= self.authorized_pos[i].y + self.pc_h):
-                    if self.authorized_pos[i].av:
+                    if self.authorized_pos[i].ob is None:
                         return True, self.authorized_pos[i], i
         return False, None, None
 
     def adjust_pos(self, place, i):
         '''Ajuste l'objet à la case sur la souris'''
         self.move_object(place.x, place.y)
-        self.authorized_pos[self.object.initPlace].av = True
+        self.authorized_pos[self.object.init_place].ob = None
         self.object.initx, self.object.inity = place.x, place.y
-        self.object.initPlace = i
-        place.av = False
+        self.object.init_place = i
+        place.ob = self.object.number
 
     def return_object(self):
         '''Retourne l'objet à son emplacement inital (avant déplacement)'''
@@ -199,15 +221,16 @@ class Application():
 
 class ObjectCanvas():
     '''Contients les caractéristiques d'objets du canvas'''
-    def __init__(self, x, y, initx, inity, initPlace, tag):
+    def __init__(self, x, y, initx, inity, init_place, tag, number):
         '''Mémorise les caractéristiques de l'objet :
             x, y : coordonnées du coin supérieur gauche
             initx, inity : coordonnées initiales de l'objet avant déplacement
             initPlace : indice de l'emplacement initial dans le tableau
             authorizedPos
-            tag : tag de l'objet dans le canvas'''
-        self.x, self.y, self.tag = x, y, tag
-        self.initx, self.inity, self.initPlace = initx, inity, initPlace
+            tag : tag de l'objet dans le canvas
+            number : numéro de tuile pour la vérification'''
+        self.x, self.y, self.tag, self.number = x, y, tag, number
+        self.initx, self.inity, self.init_place = initx, inity, init_place
 
     def __str__(self):
         '''Affiche les principales coordonnées de l'objet (utile pour debug)'''
@@ -217,11 +240,12 @@ class ObjectCanvas():
 
 class PlaceCanvas():
     '''Contients des emplacements possible de pièce de jeu sur le canvas'''
-    def __init__(self, x, y, availability):
+    def __init__(self, x, y, occupied_by, number=None):
         '''Mémorise les caractéristiques de l'emplacement :
             x, y : coordonnées du coin supérieur gauche
-            availability : si l'emplacement est disponible ou occupé'''
-        self.x, self.y, self.av = x, y, availability
+            occupied_by : numéro de l'objet occupant l'emplacement
+            number : numéro de l'emplacement pour la vérification'''
+        self.x, self.y, self.ob, self.number = x, y, occupied_by, number
 
 image = crop_image.ImagePuzzle("images\img_forest.jpg")
 boite=Application(50, 100, 100, 5, 5, image)
