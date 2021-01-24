@@ -52,7 +52,7 @@ class Application():
         self.list_tiles_i = [[list_tiles[i],i] for i in range (len(list_tiles))]
         
         #Mélange de la liste
-        #random.shuffle(self.list_tiles_i)
+        random.shuffle(self.list_tiles_i)
         
         #Conversion en matrice self.n_pc_w*self.n_pc_h
         mat_tiles = [[[self.list_tiles_i[i][0],self.list_tiles_i[i][1]] \
@@ -77,15 +77,13 @@ class Application():
         #On mémorise les emplacements autorisés des objets
         self.authorized_pos=list()
         id_p=0
-        k=0
         for i in range (self.n_pc_h):
             for j in range (self.n_pc_w):
                 #Création du plateau
                 x, y = i*self.pc_w + self.margin, j*self.pc_h + self.margin*2
                 self.cnv.create_rectangle(x, y, x + self.pc_w, y + self.pc_h)
                 #Sauvegarde les emplacement possibles
-                self.authorized_pos.append(PlaceCanvas(x,y,None,k))
-                k+=1
+                self.authorized_pos.append(PlaceCanvas(x,y,None))
 
         for i in range (self.n_pc_h):
             for j in range (self.n_pc_w):
@@ -112,8 +110,8 @@ class Application():
         
     def submit(self):
         for k in range (25):
-            #print(self.list_tiles_i[k][1], ",", self.authorized_pos[k].ob)
-            if self.list_tiles_i[k][1] != self.authorized_pos[k].ob:
+            #print(k, ",", self.authorized_pos[k].ob)
+            if k != self.authorized_pos[k].ob:
                 print("Lost !")
                 return
         print("Won !")
@@ -240,12 +238,12 @@ class ObjectCanvas():
 
 class PlaceCanvas():
     '''Contients des emplacements possible de pièce de jeu sur le canvas'''
-    def __init__(self, x, y, occupied_by, number=None):
+    def __init__(self, x, y, occupied_by):
         '''Mémorise les caractéristiques de l'emplacement :
             x, y : coordonnées du coin supérieur gauche
             occupied_by : numéro de l'objet occupant l'emplacement
             number : numéro de l'emplacement pour la vérification'''
-        self.x, self.y, self.ob, self.number = x, y, occupied_by, number
+        self.x, self.y, self.ob = x, y, occupied_by
 
 image = crop_image.ImagePuzzle("images\img_forest.jpg")
 boite=Application(50, 100, 100, 5, 5, image)
