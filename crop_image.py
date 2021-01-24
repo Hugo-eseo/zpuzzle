@@ -7,6 +7,7 @@ Created on Thu Jan 21 14:03:28 2021
 
 import math
 import random
+import os
 from PIL import Image, ImageTk
 
 class ImagePuzzle:
@@ -68,6 +69,12 @@ class ImagePuzzle:
         for i in self.tiles:
             #resize ne modifie pas l'image si pieceWidth et pieceHeigt
             #sont déjà la vraie longueur et la vraie hauteur d'une pièce
-            tile_tk.append(ImageTk.PhotoImage(i.resize((piece_width, piece_height))))
+            tile_tk.append(ImageTk.PhotoImage(i.resize((int(piece_width), int(piece_height)))))
         random.shuffle(tile_tk) #mélange de l'ordre des pièces
         return tile_tk
+    
+def image_choice(folder):
+    list_images = os.listdir(folder)
+    return random.choice(list_images)
+        
+
