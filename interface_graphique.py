@@ -85,7 +85,6 @@ class Application():
         
         #remise à zéro du chrono
         self.sec = 0
-        self.verif = True
         self.nb_coup = 3
         self.score()
         self.win()
@@ -129,12 +128,11 @@ class Application():
     def timer(self):
         """ Méthode permettant le suivi du temps écoulé après le lancement
         du jeu """
-        if(self.verif == False):
-            self.sec += 1
-            self.chaine = 'Temps écoulé: ' + str(self.sec) +'s'
-            self.chrono.after(1000, self.timer)
-            self.chrono.config(text = self.chaine)
-            self.start.destroy()
+        self.sec += 1
+        self.chaine = 'Temps écoulé: ' + str(self.sec) +'s'
+        self.chrono.after(1000, self.timer)
+        self.chrono.config(text = self.chaine)
+        self.start.destroy()
     
     def score(self):
         '''Méthode affichant le score du joueur'''
@@ -142,11 +140,10 @@ class Application():
         self.attempt.config(text = self.coup)
     
     def win(self):
-        if (self.verif == True):
-            self.frmr.pack(side=tk.TOP)
-            self.total_attempt.config(text = 'Déplacements totaux:' + 
-                                      str(self.nb_coup))
-            self.total_attempt.pack(side=tk.TOP)
+        self.frmr.pack(side=tk.TOP)
+        self.total_attempt.config(text = 'Déplacements totaux:' + 
+                                  str(self.nb_coup))
+        self.total_attempt.pack(side=tk.TOP)
     
     def first_level(self):
         '''Oui'''
