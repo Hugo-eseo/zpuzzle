@@ -6,7 +6,6 @@ Created on Thu Jan 21 14:23:08 2021
 """
 
 import tkinter as tk
-import math
 import random
 
 import crop_image
@@ -31,7 +30,7 @@ class Application():
 
         #Width et height : Largeur et hauteur du canvas
         self.width = self.pc_w*self.n_pc_w*2 + self.margin/2*(self.n_pc_w + 5)
-        self.height = self.pc_h*self.n_pc_h + self.margin*4
+        self.height = self.pc_h*self.n_pc_h + self.margin*4 + 100 #TEMPORAIRE
 
         #Création de la fenêtre
         self.wnd = tk.Tk()
@@ -39,7 +38,7 @@ class Application():
 
         #Création de la zone de dessin
         self.cnv = tk.Canvas(self.wnd, width = self.width,
-                            height = self.height, bg='white')
+            height = self.height, bg='white', bd=0, highlightthickness=0, relief='ridge')
         self.cnv.pack(side = tk.TOP)
 
         #Création des éléments servant pour l'image
@@ -62,7 +61,7 @@ class Application():
         
         #Création de la zone de commande du jeu
         self.frm = tk.Frame(self.wnd, height = self.frameHight,
-            width = self.width)
+            width = self.width, bg='green')
         self.frm.pack_propagate(0)
         self.frm.pack(side=tk.BOTTOM, expand = True)
         
@@ -101,7 +100,23 @@ class Application():
                 #Sauvegarde l'emplacement
                 self.authorized_pos.append(PlaceCanvas(xi,yi,mat_tiles[i][j][1]))
                 id_p+=1
-
+                
+        #Création des éléments graphiques
+        h=125
+        
+        coord2 = 0, self.height-h/2, self.width, self.height
+        self.cnv.create_rectangle(coord2, fill='green', outline="")
+    
+        w=10
+        n=int(self.width/w)
+        for i in range (n):
+            coord = 0+w*2*i, self.height-h, w+w*2*i-2, self.height
+            coord1 = w+w*2*i, self.height-h, 2*w+w*2*i-2, self.height
+            arc = self.cnv.create_arc(coord, start=0, extent=180, fill='green',
+                                      style=tk.CHORD, outline="")
+            arc1 = self.cnv.create_arc(coord1, start=0, extent=-180, fill='white',
+                                       style=tk.CHORD, outline="")
+        
         self.status=0
         self.cnv.bind('<Button-1>',self.clic)
         self.cnv.bind('<B1-Motion>', self.drag_clic)
