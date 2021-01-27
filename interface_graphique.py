@@ -106,10 +106,12 @@ class Application():
         
         # Pas suivant x
         x_increment = 0.1
-        x_factor = x_increment / 100
+        
+        # Largeur du sinus
+        x_factor = x_increment / 200
         
         # Amplitude du sinus
-        y_amplitude = 60
+        y_amplitude = 40
         
         #Rectangle vert pour harmoniser la construction graphique
         self.cnv.create_rectangle(0, self.height - y_amplitude, self.width, 
@@ -120,18 +122,18 @@ class Application():
         polygone avec ces coordonnées'''
         
         xy1, xy2 = [], []
-        i, xf, y, y_prev = 0, 0, 0, 0
-        for k in range (3):
+        i, k, x_max, x_prev, y, y_prev = 0, 0, 0, 0, 0, 0
+        while x < self.width:
             #Tant que le sinus ne change pas de signe
             while not (self.check_symbol(y, y_prev)):
                 
                 y_prev=y
-                x=i * x_increment + 2*xf
+                x=i * x_increment + x_max + x_prev
                 y=int(math.sin(i * x_factor) * y_amplitude)
             
                 #x
                 xy1.append(x)
-                xy2.append(i * x_increment + 1 * xf)
+                xy2.append(i * x_increment + x_prev)
                 #y
                 xy1.append(y + self.height - y_amplitude)
                 xy2.append(-y + self.height - y_amplitude)
@@ -142,8 +144,11 @@ class Application():
             self.cnv.create_polygon(xy1, fill='white')
             if (k > 0):
                 self.cnv.create_polygon(xy2, fill='green')
+            else:
+                x_max=x
+                k=1
+            x_prev=x
             xy1, xy2 = [], []
-            xf=x
         
         #Bind des touches de la souris
         self.status=0
