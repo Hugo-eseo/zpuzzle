@@ -7,6 +7,7 @@ Created on Thu Jan 21 14:23:08 2021
 
 import tkinter as tk
 import random
+import math
 
 import crop_image
 
@@ -102,21 +103,49 @@ class Application():
                 id_p+=1
                 
         #Création des éléments graphiques
-        h=125
         
-        coord2 = 0, self.height-h/2, self.width, self.height
-        self.cnv.create_rectangle(coord2, fill='green', outline="")
-    
-        w=10
-        n=int(self.width/w)
-        for i in range (n):
-            coord = 0+w*2*i, self.height-h, w+w*2*i-2, self.height
-            coord1 = w+w*2*i, self.height-h, 2*w+w*2*i-2, self.height
-            arc = self.cnv.create_arc(coord, start=0, extent=180, fill='green',
-                                      style=tk.CHORD, outline="")
-            arc1 = self.cnv.create_arc(coord1, start=0, extent=-180, fill='white',
-                                       style=tk.CHORD, outline="")
+        # Pas suivant x
+        x_increment = 0.1
+        x_factor = x_increment / 100
         
+        # Amplitude du sinus
+        y_amplitude = 60
+        
+        #Rectangle vert pour harmoniser la construction graphique
+        self.cnv.create_rectangle(0, self.height - y_amplitude, self.width, 
+                                  self.height, fill='green', outline="")
+        
+        '''Calcul tous les "x_increment" la valeur du sinus
+        la place dans un tableau de valeur avec l'abscisse, puis crée un
+        polygone avec ces coordonnées'''
+        
+        xy1, xy2 = [], []
+        i, xf, y, y_prev = 0, 0, 0, 0
+        for k in range (3):
+            #Tant que le sinus ne change pas de signe
+            while not (self.check_symbol(y, y_prev)):
+                
+                y_prev=y
+                x=i * x_increment + 2*xf
+                y=int(math.sin(i * x_factor) * y_amplitude)
+            
+                #x
+                xy1.append(x)
+                xy2.append(i * x_increment + 1 * xf)
+                #y
+                xy1.append(y + self.height - y_amplitude)
+                xy2.append(-y + self.height - y_amplitude)
+          
+                y=math.sin(i * x_factor)
+                i+=1
+            i, y, y_prev = 0, 0, 0
+            self.cnv.create_polygon(xy1, fill='white')
+            if (k > 0):
+                self.cnv.create_polygon(xy2, fill='green')
+            xy1, xy2 = [], []
+            xf=x
+        
+        #Bind des touches de la souris
         self.status=0
         self.cnv.bind('<Button-1>',self.clic)
         self.cnv.bind('<B1-Motion>', self.drag_clic)
@@ -130,6 +159,28 @@ class Application():
                 print("Lost !")
                 return
         print("Won !")
+
+    '''Les deux fonctions suivantes sont utilisées pour le tracer
+    des fonctions sinus'''
+    
+    def check_symbol(self, n1, n2):
+        '''Vérifie le signe des deux paramètres :
+            - Si ils sont de même signe : renvoie False
+            - Renvoie True sinon
+        '''
+        if n2==0:
+            return False
+        if self.symbol(n1) == self.symbol(n2):
+            return False
+        return True
+    
+    def symbol(self, number):
+        '''Retourne le signe du nombre en paramètre'''
+        if number == 0:
+            return 0
+        elif number > 0:
+            return 1
+        return -1
 
     '''
     Il existe deux modes de déplacement :
