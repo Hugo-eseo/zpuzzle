@@ -34,6 +34,7 @@ class Application():
 
         #Création de la fenêtre
         self.wnd = tk.Tk()
+        self.Leave = False
         self.wnd.title("ZPuzzle")
 
         #Création de la zone de dessin
@@ -63,24 +64,22 @@ class Application():
                                       ,width = 10)
 
         #Création des boutons
-        self.quit = tk.Button(self.frm, text='Quitter', #Bouton pour quitter
-                              command=self.wnd.destroy) 
-        self.quit.pack(side=tk.RIGHT, pady=5, padx=5)
+        
         self.start = tk.Button(self.frm, text='Start', command = self.timer)
-        self.start.pack(side=tk.TOP, pady=5, padx=5) #Bouton pour commencer à jouer
-        self.sc = tk.Label(self.frm, text = 'Votre score: ', width = 10)
+        self.start.pack(side=tk.TOP, pady=5, padx=5)
+        tk.Button(self.frm, text='Quitter', command=self.wnd.destroy).pack()
+        self.sc = tk.Label(self.frm, text = 'Votre score: ', width = 14)
         self.sc.pack(side=tk.LEFT, pady=5, padx=5)
-        self.attempt = tk.Label(self.frm, text = 'Coups: ' , width = 20)
+        self.attempt = tk.Label(self.frm, text = 'Coups: ' , width = 17)
         self.attempt.pack(side=tk.LEFT, pady=5, padx=5)
-        self.chrono = tk.Label(self.frm, text= 'Temps écoulé :', width = 10)
+        self.chrono = tk.Label(self.frm, text= 'Temps écoulé :', width = 20)
         self.chrono.pack(side = tk.LEFT, pady=5, padx=5)
         
         #remise à zéro du chrono
         self.sec = 0
-        self.verif = True
+        self.verif = False
         self.nb_coup = 3
         self.score()
-        self.win()
 
         #Création des éléments de jeux
         #On mémorise les caractéristques de chaque objet déplacable du canvas
@@ -116,14 +115,17 @@ class Application():
         self.cnv.bind('<Button-1>',self.clic)
         self.cnv.bind('<B1-Motion>', self.drag_clic)
         self.cnv.bind('<ButtonRelease-1>', self.release_clic)
+        win=Winframe(self.wnd, self.sec, self.nb_coup)
+        if self.Leave == True:
+            self.wnd.destroy()
         self.wnd.mainloop()
-
+        
     def timer(self):
         """ Méthode permettant le suivi du temps écoulé après le lancement
         du jeu """
         if(self.verif == False):
             self.sec += 1
-            self.chaine = 'Temps écoulé: ' + str(self.sec) +'s'
+            self.chaine = 'Temps écoulé: ' + str(self.sec) + ' s'
             self.chrono.after(1000, self.timer)
             self.chrono.config(text = self.chaine)
             self.start.destroy()
@@ -133,12 +135,6 @@ class Application():
         self.coup = 'Déplacements: ' + str(self.nb_coup)
         self.attempt.config(text = self.coup)
     
-    def win(self):
-        if (self.verif == True):
-            self.frmr.pack(side=tk.TOP)
-            self.total_attempt.config(text = 'Déplacements totaux:' + 
-                                      str(self.nb_coup))
-            self.total_attempt.pack(side=tk.TOP)
 
     '''
     Il existe deux modes de déplacement :
@@ -268,5 +264,22 @@ class PlaceCanvas():
             availability : si l'emplacement est disponible ou occupé'''
         self.x, self.y, self.av = x, y, availability
 
+class Winframe(tk.Toplevel):
+    '''Contient les éléments qui résumment le score du joueur'''
+    def __init__(self, parent, sec, nbcoup):
+        super().__init__(parent)
+        self.title("Score final")
+        self.config(bg='white')
+        self.time_total = 'Temps total: ' + str(sec)
+        self.nbmove_total = 'Nombre de déplacements totaux :' + str(nbcoup)
+        tk.Label(self, text=self.time_total, bg='white').pack(pady=10)
+        tk.Label(self, text=self.nbmove_total, bg='white').pack(pady=10)
+        tk.Button(self, text="Recommencer", command=self.destroy).pack()
+        tk.Button(self, text='Quitter', command=lambda: self.leave(parent)).pack()
+        
+    def leave(self, wnd):
+        '''Permet de quitter le jeu à partir de la fenêtre des scores'''
+        wnd.destroy()
+
 image = crop_image.ImagePuzzle("images\img_forest.jpg")
-boite=Application(50, 100, 100, 5, 5, image)
+boite = Application(50, 100, 100, 5, 5, image)
