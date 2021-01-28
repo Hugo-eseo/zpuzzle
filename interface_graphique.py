@@ -15,7 +15,9 @@ import crop_image
 class Application():
     '''Contients des objets correspondant à une fenêtre de jeu'''
 
-    frameHight=200 #Hauteur de la zone de commande
+    frameHight = 200 # Hauteur de la zone de commande
+    victory = True # Utilisée pour contrôler le jeu à la fin
+    wrong_pos = list() # Utilisée pour mémoriser les pièces au mauvais emplacement
 
     def __init__(self, margin, pc_w, pc_h, n_pc_w, n_pc_h, image):
         '''Crée une fenêtre tkinter. Prend en paramètres :
@@ -25,15 +27,15 @@ class Application():
             n_pc_w : nombre de pièces en largeur
             n_pc_h : nombre de pièces en hauteur'''
 
-        #Mémorisation des paramètres
+        # Mémorisation des paramètres
         self.margin, self.pc_w, self.pc_h = margin, pc_w, pc_h
         self.n_pc_w, self.n_pc_h = n_pc_w, n_pc_h
 
-        #Width et height : Largeur et hauteur du canvas
+        # Width et height : Largeur et hauteur du canvas
         self.width = self.pc_w*self.n_pc_w*2 + self.margin/2*(self.n_pc_w + 5)
-        self.height = self.pc_h*self.n_pc_h + self.margin*4 + 100 #TEMPORAIRE
+        self.height = self.pc_h*self.n_pc_h + self.margin*4 + 100 # TEMPORAIRE
 
-        #Création de la fenêtre
+        # Création de la fenêtre
         self.wnd = tk.Tk()
         self.wnd.title("ZPuzzle")
 
@@ -48,7 +50,7 @@ class Application():
         #Récupération de la liste des tuiles de l'image
         tiles = image.crop(self.n_pc_w * self.n_pc_h)
         list_tiles =  image.createTilesTk(tiles, self.pc_w, self.pc_h)
-       
+
         #Ajout d'un indice pour la vérification
         self.list_tiles_i = [[list_tiles[i],i] for i in range (len(list_tiles))]
         
@@ -68,7 +70,8 @@ class Application():
         self.frm.pack(side=tk.BOTTOM, expand = True)
         
         #TEMPORAIRE
-        tk.Button(self.frm, text='Soumettre', command=self.submit).pack()
+        self.submit_button = tk.Button(self.frm, text='Soumettre', command=self.submit)
+        self.submit_button.pack_forget()
 
         #Création des éléments de jeux
         #On mémorise les caractéristques de chaque objet déplacable du canvas
@@ -95,7 +98,7 @@ class Application():
                 tag="Object"+str(id_p)
                 self.cnv.create_image(xi + self.pc_w/2, yi + self.pc_h/2,
                     image = mat_tiles[i][j][0], tag=tag)
-                #Sauvegarde les coordonées du coin supérieur gauche et
+                # Sauvegarde les coordonées du coin supérieur gauche et
                 #l'id de l'objet pour déplacement ultérieur
                 self.object_list.append(ObjectCanvas(xi, yi, xi, yi,
                     len(self.authorized_pos), tag, mat_tiles[i][j][1]))
@@ -106,7 +109,7 @@ class Application():
         #Création des éléments graphiques
         
         # Pas suivant x
-        x_increment = 0.1
+        x_increment = 1
         
         # Largeur du sinus
         x_factor = x_increment / 150
@@ -141,12 +144,38 @@ class Application():
         self.wnd.mainloop()
         
     def submit(self):
-        for k in range (25):
+        '''Verification du puzzle'''
+        self.victory = True
+        for k in range (self.n_pc_w * self.n_pc_h):
             #print(k, ",", self.authorized_pos[k].ob)
             if k != self.authorized_pos[k].ob:
-                print("Lost !")
-                return
-        print("Won !")
+                self.victory = False
+                if self.authorized_pos[k].ob != None:
+                    x, y = self.authorized_pos[k].x, self.authorized_pos[k].y
+                    rectangle = self.cnv.create_rectangle(x, y, x + \
+                        self.pc_w, y + self.pc_h, outline='red', fill="red", width=2, stipple="gray50")
+                    self.wrong_pos.append([self.authorized_pos[k].ob, rectangle])
+        if not self.victory:
+            self.submit_button.config(text="Retirer", command=self.return_p)
+        else:
+            print("Won !")
+        
+    def return_p(self):
+        '''Retourne les pièces étant à la mauvaise position à un emplacement
+        disponible'''
+        for i in range(len(self.wrong_pos)):
+            for j in range (len(self.object_list)):
+                if self.object_list[j].number == self.wrong_pos[i][0]:
+                    self.object = self.object_list[j]
+                    for k in range(self.n_pc_w * self.n_pc_h, len(self.authorized_pos)):
+                        if self.authorized_pos[k].ob is None :
+                            self.adjust_pos(self.authorized_pos[k], k)  
+                            self.cnv.delete(self.wrong_pos[i][1])
+                            break
+                    break
+        self.wrong_pos=[]                          
+        self.submit_button.config(text="Soumettre", command=self.submit)
+        self.submit_button.pack_forget()
 
     '''
     Il existe deux modes de déplacement :
@@ -174,12 +203,18 @@ class Application():
             find, self.object = self.is_object(event.x,event.y)
             if find:
                 self.status = 1
+                self.rectangle = self.cnv.create_rectangle(self.object.x, \
+                    self.object.y, self.object.x + self.pc_w, \
+                    self.object.y + self.pc_h, outline='green', fill="", width=5)
                 return
+            self.status = 0
 
         elif self.status == 2:
+            self.status = 0
             self.final_pos(event.x, event.y)
 
-        self.status = 0
+        else:
+            self.status = 0
 
     def drag_clic(self, event):
         '''Si le clic est maintenu et la souris dépalcée'''
@@ -204,14 +239,28 @@ class Application():
         self.object.x = x
         self.object.y = y
         self.cnv.move(self.object.tag, difx, dify)
+        self.cnv.move(self.rectangle, difx, dify)
 
     def final_pos(self, x, y):
         '''Déplace et ajuste si possible l'objet vers sa position finale'''
         valid, place, i = self.valid_pos(x, y)
         if valid:
             self.adjust_pos(place, i)
+            self.check_puzzle_complete()
+            self.cnv.delete(self.rectangle)
         else:
             self.return_object()
+            self.cnv.delete(self.rectangle)
+            #Si la place est occupée, simulation d'un clic dessus
+            if place is not None:
+                #Si le clic est effectué sur le même objet, on le retourne dans le deck
+                if place.ob == self.object.number:
+                    self.wrong_pos.append([self.object.number, self.rectangle])
+                    self.return_p()
+                    return
+                self.clic(place)
+                self.release_clic(place)
+                
 
     def is_object(self, x, y):
         '''Retourne l'objet si le clic a été effectué sur un objet valide.
@@ -234,6 +283,7 @@ class Application():
                     (y <= self.authorized_pos[i].y + self.pc_h):
                     if self.authorized_pos[i].ob is None:
                         return True, self.authorized_pos[i], i
+                    return False, self.authorized_pos[i], None
         return False, None, None
 
     def adjust_pos(self, place, i):
@@ -247,6 +297,13 @@ class Application():
     def return_object(self):
         '''Retourne l'objet à son emplacement inital (avant déplacement)'''
         self.move_object(self.object.initx, self.object.inity)
+        
+    def check_puzzle_complete(self):
+        '''Vérifie si le puzzle est complet. Si oui affichage du bouton soumettre'''
+        for k in range (self.n_pc_w * self.n_pc_h):
+            if self.authorized_pos[k].ob is None:
+                return
+        self.submit_button.pack()
 
 
 class ObjectCanvas():
