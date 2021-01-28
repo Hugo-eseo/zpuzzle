@@ -7,7 +7,7 @@ Created on Thu Jan 21 14:23:08 2021
 
 import tkinter as tk
 import math
-
+from tkinter.messagebox import askyesno
 import crop_image
 
 
@@ -268,6 +268,7 @@ class Winframe(tk.Toplevel):
     '''Contient les éléments qui résumment le score du joueur'''
     def __init__(self, parent, sec, nbcoup):
         super().__init__(parent)
+        self.geometry("-690+350")
         self.title("Score final")
         self.config(bg='white')
         self.time_total = 'Temps total: ' + str(sec)
@@ -279,7 +280,10 @@ class Winframe(tk.Toplevel):
         
     def leave(self, wnd):
         '''Permet de quitter le jeu à partir de la fenêtre des scores'''
-        wnd.destroy()
+        if askyesno('Vous êtes sur le point de quitter', 'Êtes-vous sûr de vouloir quitter ?'):
+            wnd.destroy()                        
+        else:
+            self.destroy()
 
 image = crop_image.ImagePuzzle("images\img_forest.jpg")
 boite = Application(50, 100, 100, 5, 5, image)
