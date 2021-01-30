@@ -78,35 +78,32 @@ class Application():
                             width=self.width, bg='green')
         self.frm.pack_propagate(0)
         self.frm.pack(side=tk.BOTTOM, expand=True)
-        
+
         # Création de la fenêtre de réussite et de ses éléments
-        self.frmr = tk.Frame(self.wnd, height = (self.frameHight)/2, 
-                            width = (self.width)/2, bg='white')
-        self.total_attempt = tk.Label(self.frmr, text = 'Déplacements totaux: '
-                                      ,width = 10)
+        self.frmr = tk.Frame(self.wnd, height=(self.frameHight)/2,
+            width=(self.width)/2, bg='white')
+        self.total_attempt = tk.Label(self.frmr, text='Déplacements totaux: ',
+            width=10)
 
         # Création des boutons
-        
-        self.start = tk.Button(self.frm, text='Start', command = self.timer)
+
+        self.start = tk.Button(self.frm, text='Start', command=self.timer)
         self.start.pack(side=tk.TOP, pady=5, padx=5)
         tk.Button(self.frm, text='Quitter', command=self.wnd.destroy).pack()
-        self.sc = tk.Label(self.frm, text = 'Votre score: ', width = 14)
+        self.sc = tk.Label(self.frm, text='Votre score: ', width=14)
         self.sc.pack(side=tk.LEFT, pady=5, padx=5)
-        self.attempt = tk.Label(self.frm, text = 'Coups: ' , width = 17)
+        self.attempt = tk.Label(self.frm, text='Coups: ', width=17)
         self.attempt.pack(side=tk.LEFT, pady=5, padx=5)
-        self.chrono = tk.Label(self.frm, text= 'Temps écoulé :', width = 20)
-        self.chrono.pack(side = tk.LEFT, pady=5, padx=5)
-        
+        self.chrono = tk.Label(self.frm, text='Temps écoulé :', width=20)
+        self.chrono.pack(side=tk.LEFT, pady=5, padx=5)
+
         # Remise à zéro du chrono
         self.sec = 0
         self.verif = False
         self.nb_coup = 3
         self.score()
 
-        win=Winframe(self.wnd, self.sec, self.nb_coup)
-        if self.Leave == True:
-            self.wnd.destroy()
-        self.wnd.mainloop()
+        Winframe(self.wnd, self.sec, self.nb_coup)
 
         # TEMPORAIRE
         self.submit_button = tk.Button(self.frm, text='Soumettre',
@@ -266,21 +263,21 @@ class Application():
         self.cnv.bind('<Button-1>', self.clic)
         self.cnv.bind('<B1-Motion>', self.drag_clic)
         self.cnv.bind('<ButtonRelease-1>', self.release_clic)
-        
+
     def timer(self):
         ''' Méthode permettant le suivi du temps écoulé après le lancement
         du jeu '''
-        if(self.verif == False):
+        if not self.verif:
             self.sec += 1
             self.chaine = 'Temps écoulé: ' + str(self.sec) + ' s'
             self.chrono.after(1000, self.timer)
-            self.chrono.config(text = self.chaine)
+            self.chrono.config(text=self.chaine)
             self.start.destroy()
-    
+
     def score(self):
         '''Méthode affichant le score du joueur'''
         self.coup = 'Déplacements: ' + str(self.nb_coup)
-        self.attempt.config(text = self.coup)
+        self.attempt.config(text=self.coup)
 
     '''
     Pour la machine à état, il existe deux modes de déplacement :
@@ -488,6 +485,7 @@ class Application():
 
 class ObjectCanvas():
     '''Contients les caractéristiques d'objets du canvas'''
+
     def __init__(self, x, y, tag, number):
         '''Mémorise les caractéristiques de l'objet :
             x, y : coordonnées du coin supérieur gauche
@@ -522,7 +520,8 @@ class PlaceCanvas():
             x, y : coordonnées du coin supérieur gauche
             occupied_by : objet occupant l'emplacement '''
         self.x, self.y, self.ob = x, y, occupied_by
- 
+
+
 class Winframe(tk.Toplevel):
     '''Contient les éléments qui résumment le score du joueur'''
 
@@ -547,7 +546,7 @@ class Winframe(tk.Toplevel):
         else:
             self.destroy()
 
- 
+
 class Rules(tk.Toplevel):
     '''Contient les éléments qui résumment le score du joueur'''
 
