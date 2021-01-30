@@ -7,9 +7,38 @@ Created on Thu Jan 21 14:23:08 2021
 import tkinter as tk
 import math
 import os
+from PIL import Image, ImageTk
+
 import crop_image
 
-
+class Welcome():
+    def __init__(self, folder):
+        self.folder = folder
+        self.wnd = tk.Tk()
+        self.wnd.title("Welcome")
+        self.wnd.geometry("1000x800")
+        
+        self.frm_left = tk.Frame(self.wnd, height=800,width=250, bg='light grey')
+        self.frm_left.pack(side=tk.LEFT)
+        
+        self.cnv_middle = tk.Canvas(self.wnd,height=800, width=500, bg='white')
+        self.cnv_middle.pack(side=tk.LEFT)
+        
+        self.frm_right = tk.Canvas(self.wnd,height=800,width=250, bg='light grey')
+        self.frm_right.pack(side=tk.RIGHT)
+        self.list_images = os.listdir(self.folder)
+        
+        self.image = Image.open("images\\" + self.list_images[5])
+        ratio_wh = self.image.size[0]/self.image.size[1]
+        self.image = self.image.resize((int(300*ratio_wh),300))
+        self.image_tk = ImageTk.PhotoImage(self.image)
+        tag="oui"
+        
+        self.cnv_middle.create_image(1000/2,
+                             800/2,
+                           image = self.image_tk, tag=tag)
+        self.wnd.mainloop()
+        
 class Application():
     '''Contients des objets correspondant à une fenêtre de jeu'''
 
@@ -301,13 +330,14 @@ class PlaceCanvas():
             availability : si l'emplacement est disponible ou occupé'''
         self.x, self.y, self.av = x, y, availability
 
-
+welcome = Welcome("images")
+'''
 chosen_image = crop_image.image_choice("images")
 image = crop_image.ImagePuzzle("images\\" + str(chosen_image))
 ratio_wh = image.width/image.height
 print(image.width,image.height,ratio_wh)
 boite=Application(40, 70*ratio_wh, 70, 5, 5, image)
-
+'''
 
 
 

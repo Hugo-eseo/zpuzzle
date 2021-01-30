@@ -10,7 +10,7 @@ import random
 import os
 from PIL import Image, ImageTk
 
-class ImagePuzzle:
+class ImagePuzzle():
     '''Prend une image en paramètre et effectue des opérations dessus'''
     def __init__(self, image):
         '''
