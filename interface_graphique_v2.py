@@ -214,6 +214,10 @@ class Application():
             # En cas de mauvaise combinaison, le bouton Retirer s'affiche
             self.submit_button.config(text="Retirer", command=lambda:
                 self.return_wrong_pos_object(wrong_pos_object))
+            # On désactive les clics
+            self.cnv.unbind('<Button-1>')
+            self.cnv.unbind('<B1-Motion>')
+            self.cnv.unbind('<ButtonRelease-1>')
         else:
             # Sinon c'est la victoire !
             print("Won !")
@@ -224,9 +228,13 @@ class Application():
         for i in range(len(wrong_pos_object)):
             self.send_back_object_to_deck(wrong_pos_object[i][0])
             self.cnv.delete(wrong_pos_object[i][1])
-
+        # On enlève le bouton rentirer
         self.submit_button.config(text="Soumettre", command=self.submit)
         self.submit_button.pack_forget()
+        # On réactive les clics :
+        self.cnv.bind('<Button-1>', self.clic)
+        self.cnv.bind('<B1-Motion>', self.drag_clic)
+        self.cnv.bind('<ButtonRelease-1>', self.release_clic)
 
     '''
     Pour la machine à état, il existe deux modes de déplacement :
