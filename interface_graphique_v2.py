@@ -43,7 +43,7 @@ class Application():
 
         # Width et height : Largeur et hauteur du canvas
         self.width = self.pc_w*self.n_pc_w*2 + self.margin/2*(self.n_pc_w + 5)
-        self.height = self.pc_h*self.n_pc_h + self.margin*4 + 100  # TEMPORAIRE
+        self.height = self.pc_h*self.n_pc_h + self.margin*4 + 150  # TEMPORAIRE
 
         # Création de la fenêtre
         self.wnd = tk.Tk()
@@ -78,35 +78,43 @@ class Application():
                             width=self.width, bg='green')
         self.frm.pack_propagate(0)
         self.frm.pack(side=tk.BOTTOM, expand=True)
-        
-        # Création de la fenêtre de réussite et de ses éléments
-        self.frmr = tk.Frame(self.wnd, height = (self.frameHight)/2, 
-                            width = (self.width)/2, bg='white')
-        self.total_attempt = tk.Label(self.frmr, text = 'Déplacements totaux: '
-                                      ,width = 10)
+
+        '''# Création de la fenêtre de réussite et de ses éléments
+        self.frmr = tk.Frame(self.wnd, height=(self.frameHight)/2,
+            width=(self.width)/2, bg='white')
+        self.total_attempt = tk.Label(self.frmr, text='Déplacements totaux: ',
+            width=10)'''
+
+        # TEST
+
+        self.top_frame = tk.Frame(self.cnv, height=self.margin, 
+            width=self.width, bg='green')
+        self.top_frame.pack_propagate(0)
+        self.top_frame.place(x=0, y=0, anchor=tk.NW)
 
         # Création des boutons
-        
-        self.start = tk.Button(self.frm, text='Start', command = self.timer)
+
+        self.start = tk.Button(self.frm, text='Start', command=self.start_game)
         self.start.pack(side=tk.TOP, pady=5, padx=5)
-        tk.Button(self.frm, text='Quitter', command=self.wnd.destroy).pack()
-        self.sc = tk.Label(self.frm, text = 'Votre score: ', width = 14)
+        tk.Button(self.frm, text='Quitter', command=self.stop_game).pack()
+        self.sc = tk.Label(self.top_frame, text='VOTRE SCORE: ', width=14,
+            bg='green', fg='white', font=('Franklin Gothic Demi Cond',12))
         self.sc.pack(side=tk.LEFT, pady=5, padx=5)
-        self.attempt = tk.Label(self.frm, text = 'Coups: ' , width = 17)
+        self.attempt = tk.Label(self.top_frame, text='Déplacement : 0', 
+            width=17, bg='green', fg='white',
+            font=('Franklin Gothic Demi Cond',12))
         self.attempt.pack(side=tk.LEFT, pady=5, padx=5)
-        self.chrono = tk.Label(self.frm, text= 'Temps écoulé :', width = 20)
-        self.chrono.pack(side = tk.LEFT, pady=5, padx=5)
-        
+        self.chrono = tk.Label(self.top_frame, text='Temps écoulé : 0s', 
+            width=20, bg='green', fg='white',
+            font=('Franklin Gothic Demi Cond',12))
+        self.chrono.pack(side=tk.LEFT, pady=5, padx=5)
+
         # Remise à zéro du chrono
         self.sec = 0
-        self.verif = False
-        self.nb_coup = 3
-        self.score()
+        self.chrono_on = [False, None]
+        self.move = 0
 
-        win=Winframe(self.wnd, self.sec, self.nb_coup)
-        if self.Leave == True:
-            self.wnd.destroy()
-        self.wnd.mainloop()
+        #Winframe(self.wnd, self.sec, self.nb_coup) #TEMPORAIRE
 
         # TEMPORAIRE
         self.submit_button = tk.Button(self.frm, text='Soumettre',
@@ -143,7 +151,7 @@ class Application():
         # Etape 1: Création du plateau de jeu
         for i in range(self.n_pc_h):
             for j in range(self.n_pc_w):
-                x, y = i*self.pc_w + self.margin, j*self.pc_h + self.margin*2
+                x, y = i*self.pc_w + self.margin, j*self.pc_h + self.margin*3
                 self.cnv.create_rectangle(x, y, x + self.pc_w, y + self.pc_h)
                 # Sauvegarde chaque emplacement dessiné
                 self.authorized_pos.append(PlaceCanvas(x, y, None))
@@ -154,7 +162,7 @@ class Application():
                 # Affichage des images découpés
                 xi = self.pc_w*(self.n_pc_w) + self.margin*2 + \
                     i*(self.pc_w + self.margin/2)
-                yi = j*(self.pc_h + self.margin/2) + self.margin
+                yi = j*(self.pc_h + self.margin/2) + self.margin*2
                 tag = "Object" + str(id_p)
                 self.cnv.create_image(xi + self.pc_w/2, yi + self.pc_h/2,
                     image=mat_tiles[i][j][0], tag=tag)
@@ -195,13 +203,8 @@ class Application():
         xy.append(self.height)
         self.cnv.create_polygon(xy, fill='green')
 
-        # Bind des touches de la souris
-        self.cnv.bind('<Button-1>', self.clic)
-        self.cnv.bind('<B1-Motion>', self.drag_clic)
-        self.cnv.bind('<ButtonRelease-1>', self.release_clic)
-
-        win=Winframe(self.wnd, self.sec, self.nb_coup)
-        rules=Rules(self.wnd, self.frameHight, self.width)
+        Rules(self.wnd, self.frameHight, self.width)
+        self.wnd.protocol("WM_DELETE_WINDOW", self.stop_game)
         self.wnd.mainloop()
 
     '''Pour chaque 'clic' de souris différent (clic, relachement du clic
@@ -269,21 +272,39 @@ class Application():
         self.cnv.bind('<Button-1>', self.clic)
         self.cnv.bind('<B1-Motion>', self.drag_clic)
         self.cnv.bind('<ButtonRelease-1>', self.release_clic)
-        
+
+    def start_game(self):
+        '''Lance la partie !'''
+        # Bind des touches de la souris
+        self.cnv.bind('<Button-1>', self.clic)
+        self.cnv.bind('<B1-Motion>', self.drag_clic)
+        self.cnv.bind('<ButtonRelease-1>', self.release_clic)
+        # Lance le timer
+        self.chrono_on[0] = True
+        self.timer()
+        self.start.destroy()
+
+    def stop_game(self):
+        '''Stop la partie'''
+        self.chrono_on[0] = False
+        if self.chrono_on[1] is not None:
+            self.wnd.after_cancel(self.chrono_on[1])
+        self.wnd.destroy()
+
     def timer(self):
         ''' Méthode permettant le suivi du temps écoulé après le lancement
         du jeu '''
-        if(self.verif == False):
+        if self.chrono_on[0]:
             self.sec += 1
-            self.chaine = 'Temps écoulé: ' + str(self.sec) + ' s'
-            self.chrono.after(1000, self.timer)
-            self.chrono.config(text = self.chaine)
-            self.start.destroy()
-    
-    def score(self):
+            string = 'Temps écoulé: ' + str(self.sec) + ' s'
+            self.chrono_on[1] = self.wnd.after(1000, self.timer)
+            self.chrono.config(text=string)
+
+    def update_score(self):
         '''Méthode affichant le score du joueur'''
-        self.coup = 'Déplacements: ' + str(self.nb_coup)
-        self.attempt.config(text = self.coup)
+        self.move += 1
+        string = 'Déplacements: ' + str(self.move)
+        self.attempt.config(text=string)
 
     '''
     Pour la machine à état, il existe deux modes de déplacement :
@@ -403,6 +424,8 @@ class Application():
         self.desactivate_curent_selection()
         # 4 : On vérifie si le puzzle est complet
         self.check_puzzle_complete()
+        # 5 : On met à jour le score
+        self.update_score()
 
     def send_object_to_final_pos(self, object_select, pos):
         '''Envoie l'object de type ObjectSelect
@@ -418,6 +441,8 @@ class Application():
             self.desactivate_curent_selection()
         # 5 : On vérifie si le puzzle est complet
         self.check_puzzle_complete()
+        # 6 : On met à jour le score
+        self.update_score()
 
     def send_back_object_to_deck(self, object_select):
         '''Renvoie l'objet passé en argument dans la pioche'''
@@ -427,11 +452,6 @@ class Application():
                 # pioche trouvé
                 self.send_object_to_final_pos(object_select,
                     self.authorized_pos[k])
-                '''self.move_object(object_select, self.authorized_pos[k].x,
-                    self.authorized_pos[k].y)
-                self.authorized_pos[k].ob = object_select.object
-                object_select.init_pos.ob = None
-                self.check_puzzle_complete()'''
                 return
 
     def move_object(self, object_select, x, y):
@@ -491,6 +511,7 @@ class Application():
 
 class ObjectCanvas():
     '''Contients les caractéristiques d'objets du canvas'''
+
     def __init__(self, x, y, tag, number):
         '''Mémorise les caractéristiques de l'objet :
             x, y : coordonnées du coin supérieur gauche
@@ -525,7 +546,8 @@ class PlaceCanvas():
             x, y : coordonnées du coin supérieur gauche
             occupied_by : objet occupant l'emplacement '''
         self.x, self.y, self.ob = x, y, occupied_by
- 
+
+
 class Winframe(tk.Toplevel):
     '''Contient les éléments qui résumment le score du joueur'''
 
@@ -550,7 +572,7 @@ class Winframe(tk.Toplevel):
         else:
             self.destroy()
 
- 
+
 class Rules(tk.Toplevel):
     '''Contient les éléments qui résumment le score du joueur'''
 
