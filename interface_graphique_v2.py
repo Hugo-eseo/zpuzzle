@@ -327,7 +327,7 @@ class Application():
                     # Si l'utilisateur re-dépose l'objet sur sa case initiale
                     if result is not None and result.ob == self.object.object:
                         # On ne désactive pas la sélection
-                        self.status = 1
+                        self.status = 2
                     else:
                         # Sinon, on retire la sélection active
                         self.desactivate_curent_selection()
@@ -386,6 +386,8 @@ class Application():
     def active_selection_on_object(self, object_select, place):
         '''Active la sélection sur l'objet passé en argument.
         Dessine un contour vert autour de lui et le mémorise'''
+        # Passe au premier plan l'objet sélectionné
+        self.cnv.tag_raise(object_select.tag)
         rectangle = self.cnv.create_rectangle(object_select.x, object_select.y,
             object_select.x + self.pc_w, object_select.y + self.pc_h,
             outline='green', fill="", width=5)
