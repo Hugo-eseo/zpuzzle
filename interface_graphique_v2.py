@@ -228,7 +228,7 @@ class Application():
         for i in range(len(wrong_pos_object)):
             self.send_back_object_to_deck(wrong_pos_object[i][0])
             self.cnv.delete(wrong_pos_object[i][1])
-        # On enlève le bouton rentirer
+        # On enlève le bouton retirer
         self.submit_button.config(text="Soumettre", command=self.submit)
         self.submit_button.pack_forget()
         # On réactive les clics :
@@ -296,7 +296,6 @@ class Application():
                 # on retourne l'objet dans la pioche
                 if not self.chrono_stop:
                     self.send_back_object_to_deck(self.object)
-                    self.desactivate_curent_selection()
                 # Sinon, on attend de nouveau un clic, retour à Status = 1
                 else:
                     self.status = 1
@@ -347,7 +346,8 @@ class Application():
         # 3 : On met à jour l'emplacement final
         pos.ob = object_select.object
         # 4 : On désactive la sélection
-        self.desactivate_curent_selection()
+        if object_select.border is not None:
+            self.desactivate_curent_selection()
         # 5 : On vérifie si le puzzle est complet
         self.check_puzzle_complete()
 
@@ -357,10 +357,13 @@ class Application():
             if self.authorized_pos[k].ob is None:
                 # On déplace l'objet dans le premier emplacement libre de la
                 # pioche trouvé
-                self.move_object(object_select, self.authorized_pos[k].x,
+                self.send_object_to_final_pos(object_select, 
+                    self.authorized_pos[k])
+                '''self.move_object(object_select, self.authorized_pos[k].x,
                     self.authorized_pos[k].y)
                 self.authorized_pos[k].ob = object_select.object
                 object_select.init_pos.ob = None
+                self.check_puzzle_complete()'''
                 return
 
     def move_object(self, object_select, x, y):
@@ -411,6 +414,7 @@ class Application():
         Si oui affichage du bouton soumettre'''
         for k in range(self.n_pc_w * self.n_pc_h):
             if self.authorized_pos[k].ob is None:
+                self.submit_button.pack_forget()
                 return
         self.submit_button.pack()
 
