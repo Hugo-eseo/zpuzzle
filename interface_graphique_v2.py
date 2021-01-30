@@ -328,6 +328,12 @@ class Application():
                     if result is not None and result.ob == self.object.object:
                         # On ne désactive pas la sélection
                         self.status = 2
+                    # Si l'utilisateur dépose l'objet sur une case contentant
+                    # déjà un autre objet
+                    elif result is not None and result.ob is not None:
+                        # On échange intervertit les deux objets
+                        self.swap_two_object(self.object,
+                            ObjectSelect(result.ob, result))
                     else:
                         # Sinon, on retire la sélection active
                         self.desactivate_curent_selection()
@@ -335,6 +341,19 @@ class Application():
                 else:
                     # On y déplace l'objet
                     self.send_object_to_final_pos(self.object, result)
+
+    def swap_two_object(self, object1, object2):
+        '''Enchange la position de deux objets'''
+        # 1 : On déplace les deux objets
+        self.move_object(object1, object2.init_pos.x, object2.init_pos.y)
+        self.move_object(object2, object1.init_pos.x, object1.init_pos.y)
+        # 2 : On met à jour leur emplacement initial
+        object1.init_pos.ob = object2.object
+        object2.init_pos.ob = object1.object
+        # 3 : On désactive la sélection
+        self.desactivate_curent_selection()
+        # 4 : On vérifie si le puzzle est complet
+        self.check_puzzle_complete()
 
     def send_object_to_final_pos(self, object_select, pos):
         '''Envoie l'object de type ObjectSelect
