@@ -128,3 +128,4 @@ dmypy.json
 # Pyre type checker
 .pyre/
 .pylint.d/interface_graphique1.stats
+*.stats

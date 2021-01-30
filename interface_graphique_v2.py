@@ -81,7 +81,7 @@ class Application():
         self.submit_button = tk.Button(self.frm, text='Soumettre',
                                        command=self.submit)
         self.submit_button.pack_forget()
-        
+
         '''Pour fonctionner, le jeu utilise 3 classes suplémentaires:
 
             ObjectCanvas : Mémorise toutes les informations des tuiles sur le
@@ -108,7 +108,7 @@ class Application():
         self.object = None
         # Utilisé pour le tag canvas de l'objet
         id_p = 0
-        
+
         # Etape 1: Création du plateau de jeu
         for i in range(self.n_pc_h):
             for j in range(self.n_pc_w):
@@ -135,7 +135,7 @@ class Application():
                     self.object_list[-1]))
                 id_p += 1
 
-        # Création des éléments de dessin graphiques : 
+        # Création des éléments de dessin graphiques :
         # Création de la sinusoide
 
         # Configuration
@@ -341,7 +341,7 @@ class Application():
         passé en argument vers sa position finale pos'''
         # 1 : On déplace l'objet
         self.move_object(object_select, pos.x, pos.y)
-        # 2 : On met à jour l'emplacement initial 
+        # 2 : On met à jour l'emplacement initial
         object_select.init_pos.ob = None
         # 3 : On met à jour l'emplacement final
         pos.ob = object_select.object
@@ -357,7 +357,7 @@ class Application():
             if self.authorized_pos[k].ob is None:
                 # On déplace l'objet dans le premier emplacement libre de la
                 # pioche trouvé
-                self.send_object_to_final_pos(object_select, 
+                self.send_object_to_final_pos(object_select,
                     self.authorized_pos[k])
                 '''self.move_object(object_select, self.authorized_pos[k].x,
                     self.authorized_pos[k].y)
@@ -369,8 +369,8 @@ class Application():
     def move_object(self, object_select, x, y):
         '''Déplace l'objet de type ObjectSelect passé en argument
         dans le canvas aux coordonnées x, y'''
-        difx = - (object_select.object.x-x)
-        dify = - (object_select.object.y-y)
+        difx = - (object_select.object.x - x)
+        dify = - (object_select.object.y - y)
         # On met à jour les coordonnées de l'objet
         object_select.object.x = x
         object_select.object.y = y
