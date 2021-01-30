@@ -76,6 +76,9 @@ class Application():
         self.third_level = tk.Button(self.frm, text = 'Niveau 3',
                                      command = self.third_level)
         self.third_level.pack(side = tk.LEFT, anchor = 'nw', padx = 3)
+        self.change_image = tk.Button(self.frm, text="Changer d'image",
+                                      command = self.change_image)
+        self.change_image.pack(side=tk.LEFT, anchor='nw')
         self.sc = tk.Label(self.frm, text = 'Votre score: ', width = 10)
         self.sc.pack(side=tk.LEFT, pady=5, padx=5)
         self.attempt = tk.Label(self.frm, text = 'Coups: ' , width = 20)
@@ -161,7 +164,13 @@ class Application():
         ratio_wh = self.image.width/self.image.height
         self.wnd.destroy()
         boite=Application(35, 60*ratio_wh, 60, 7, 7, self.image)
-
+    def change_image(self):
+        '''Oui'''
+        self.wnd.destroy()
+        chosen_image = crop_image.image_choice("images")
+        image = crop_image.ImagePuzzle("images\\" + str(chosen_image))
+        ratio_wh = image.width/image.height
+        boite=Application(40, 70*ratio_wh, 70, 5, 5, image)
 
 
     '''
