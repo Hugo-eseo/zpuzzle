@@ -94,19 +94,20 @@ class Application():
 
         # Création des boutons
 
-        self.start = tk.Button(self.frm, text='Start', command=self.start_game)
-        self.start.pack(side=tk.TOP, pady=5, padx=5)
+        self.start_button = tk.Button(self.frm, text='Start',
+            command=self.start_pause_game)
+        self.start_button.pack(side=tk.TOP, pady=5, padx=5)
         tk.Button(self.frm, text='Quitter', command=self.stop_game).pack()
         self.sc = tk.Label(self.top_frame, text='VOTRE SCORE: ', width=14,
-            bg='green', fg='white', font=('Franklin Gothic Demi Cond',12))
+            bg='green', fg='white', font=('Franklin Gothic Demi Cond', 12))
         self.sc.pack(side=tk.LEFT, pady=5, padx=5)
-        self.attempt = tk.Label(self.top_frame, text='Déplacement : 0', 
+        self.attempt = tk.Label(self.top_frame, text='Déplacement : 0',
             width=17, bg='green', fg='white',
-            font=('Franklin Gothic Demi Cond',12))
+            font=('Franklin Gothic Demi Cond', 12))
         self.attempt.pack(side=tk.LEFT, pady=5, padx=5)
-        self.chrono = tk.Label(self.top_frame, text='Temps écoulé : 0s', 
+        self.chrono = tk.Label(self.top_frame, text='Temps écoulé : 0s',
             width=20, bg='green', fg='white',
-            font=('Franklin Gothic Demi Cond',12))
+            font=('Franklin Gothic Demi Cond', 12))
         self.chrono.pack(side=tk.LEFT, pady=5, padx=5)
 
         # Remise à zéro du chrono
@@ -230,6 +231,8 @@ class Application():
         '''Verification du puzzle lorsque l'utilisateur appuis sur le bouton
         soumettre'''
         self.victory = True
+        self.start_button.pack_forget()
+        self.chrono_on[0] = False
         wrong_pos_object = list()
         # On vérifie emplacement par emplacement si ce dernier est
         # occupé par la bonne pièce
@@ -268,20 +271,31 @@ class Application():
         self.submit_button.config(text="Soumettre", command=self.submit)
         self.submit_button.pack_forget()
         # On réactive les clics :
+        self.chrono_on[0] = True
+        self.timer()
+        self.start_button.pack()
         self.cnv.bind('<Button-1>', self.clic)
         self.cnv.bind('<B1-Motion>', self.drag_clic)
         self.cnv.bind('<ButtonRelease-1>', self.release_clic)
 
-    def start_game(self):
-        '''Lance la partie !'''
-        # Bind des touches de la souris
-        self.cnv.bind('<Button-1>', self.clic)
-        self.cnv.bind('<B1-Motion>', self.drag_clic)
-        self.cnv.bind('<ButtonRelease-1>', self.release_clic)
-        # Lance le timer
-        self.chrono_on[0] = True
-        self.timer()
-        self.start.destroy()
+    def start_pause_game(self):
+        '''Lance la partie ou met en pause la partie'''
+        if self.chrono_on[0]:
+            # On désactive les clics
+            self.cnv.unbind('<Button-1>')
+            self.cnv.unbind('<B1-Motion>')
+            self.cnv.unbind('<ButtonRelease-1>')
+            self.chrono_on[0] = False
+            self.start_button.config(text="Play")
+        else:
+            # Bind des touches de la souris
+            self.cnv.bind('<Button-1>', self.clic)
+            self.cnv.bind('<B1-Motion>', self.drag_clic)
+            self.cnv.bind('<ButtonRelease-1>', self.release_clic)
+            # Lance le timer
+            self.chrono_on[0] = True
+            self.timer()
+            self.start_button.config(text="Pause")
         
     def stop_game(self):
         '''Stop la partie'''
