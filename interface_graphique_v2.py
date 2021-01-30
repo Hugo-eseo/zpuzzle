@@ -6,8 +6,10 @@ Created on Thu Jan 21 14:23:08 2021
 """
 
 import tkinter as tk
+
 import random
 import math
+from tkinter.messagebox import askyesno
 
 import crop_image
 
@@ -76,6 +78,35 @@ class Application():
                             width=self.width, bg='green')
         self.frm.pack_propagate(0)
         self.frm.pack(side=tk.BOTTOM, expand=True)
+        
+        # Création de la fenêtre de réussite et de ses éléments
+        self.frmr = tk.Frame(self.wnd, height = (self.frameHight)/2, 
+                            width = (self.width)/2, bg='white')
+        self.total_attempt = tk.Label(self.frmr, text = 'Déplacements totaux: '
+                                      ,width = 10)
+
+        # Création des boutons
+        
+        self.start = tk.Button(self.frm, text='Start', command = self.timer)
+        self.start.pack(side=tk.TOP, pady=5, padx=5)
+        tk.Button(self.frm, text='Quitter', command=self.wnd.destroy).pack()
+        self.sc = tk.Label(self.frm, text = 'Votre score: ', width = 14)
+        self.sc.pack(side=tk.LEFT, pady=5, padx=5)
+        self.attempt = tk.Label(self.frm, text = 'Coups: ' , width = 17)
+        self.attempt.pack(side=tk.LEFT, pady=5, padx=5)
+        self.chrono = tk.Label(self.frm, text= 'Temps écoulé :', width = 20)
+        self.chrono.pack(side = tk.LEFT, pady=5, padx=5)
+        
+        # Remise à zéro du chrono
+        self.sec = 0
+        self.verif = False
+        self.nb_coup = 3
+        self.score()
+
+        win=Winframe(self.wnd, self.sec, self.nb_coup)
+        if self.Leave == True:
+            self.wnd.destroy()
+        self.wnd.mainloop()
 
         # TEMPORAIRE
         self.submit_button = tk.Button(self.frm, text='Soumettre',
@@ -235,6 +266,21 @@ class Application():
         self.cnv.bind('<Button-1>', self.clic)
         self.cnv.bind('<B1-Motion>', self.drag_clic)
         self.cnv.bind('<ButtonRelease-1>', self.release_clic)
+        
+    def timer(self):
+        ''' Méthode permettant le suivi du temps écoulé après le lancement
+        du jeu '''
+        if(self.verif == False):
+            self.sec += 1
+            self.chaine = 'Temps écoulé: ' + str(self.sec) + ' s'
+            self.chrono.after(1000, self.timer)
+            self.chrono.config(text = self.chaine)
+            self.start.destroy()
+    
+    def score(self):
+        '''Méthode affichant le score du joueur'''
+        self.coup = 'Déplacements: ' + str(self.nb_coup)
+        self.attempt.config(text = self.coup)
 
     '''
     Pour la machine à état, il existe deux modes de déplacement :
@@ -442,7 +488,6 @@ class Application():
 
 class ObjectCanvas():
     '''Contients les caractéristiques d'objets du canvas'''
-
     def __init__(self, x, y, tag, number):
         '''Mémorise les caractéristiques de l'objet :
             x, y : coordonnées du coin supérieur gauche
@@ -477,6 +522,61 @@ class PlaceCanvas():
             x, y : coordonnées du coin supérieur gauche
             occupied_by : objet occupant l'emplacement '''
         self.x, self.y, self.ob = x, y, occupied_by
+ 
+class Winframe(tk.Toplevel):
+    '''Contient les éléments qui résumment le score du joueur'''
+
+    def __init__(self, parent, sec, nbcoup):
+        super().__init__(parent)
+        self.geometry("-690+350")
+        self.title("Score final")
+        self.config(bg='white')
+        self.time_total = 'Temps total: ' + str(sec)
+        self.nbmove_total = 'Nombre de déplacements totaux :' + str(nbcoup)
+        tk.Label(self, text=self.time_total, bg='white').pack(pady=10)
+        tk.Label(self, text=self.nbmove_total, bg='white').pack(pady=10)
+        tk.Button(self, text="Recommencer", command=self.destroy).pack()
+        tk.Button(self, text='Quitter', command=lambda: self.leave(parent))\
+            .pack()
+
+    def leave(self, wnd):
+        '''Permet de quitter le jeu à partir de la fenêtre des scores'''
+        if askyesno('Vous êtes sur le point de quitter',
+                    'Êtes-vous sûr de vouloir quitter ?'):
+            wnd.destroy()
+        else:
+            self.destroy()
+
+ 
+class Rules(tk.Toplevel):
+    '''Contient les éléments qui résumment le score du joueur'''
+
+    def __init__(self, parent, frame_height, frame_width):
+        super().__init__(parent)
+        self.geometry("-690+350")
+        self.title("Règles du jeu")
+        self.frm = tk.Frame(self.wnd, height=frame_height/3,
+                            width = frame_width/3, bg='white')
+        txt ="Votre objectif est de compléter ce puzzle avec le moins ",
+        "de déplacements possible et dans un minimum de temps"
+        tk.Label(self, text=txt, width = 30).pack()
+        txt = "Pour déplacer une tuile deux choix s'offre à vous:"
+        tk.Label(self, text=txt, width = 30).pack()
+        txt = "-Cliquez sur la tuile et cliquer ensuite sur",
+        " l'emplacement que vous voulez"
+        tk.Label(self, text=txt, width = 30).pack()
+        txt = "-Maintenez le clic sur la tuile et déplacez la en la",
+        " glissant sur le plateau"
+        tk.Label(self, text=txt, width = 30).pack()
+        txt = "Pour retirer une tuile, double-cliquez sur celle-ci"
+        tk.Label(self, text=txt, width = 30).pack()
+        txt = "Vous pouvez interchanger deux tuiles en glissant la",
+        " première sur la deuxième"
+        tk.Label(self, text=txt, width = 30).pack()
+        txt = "Appuyer sur le bouton soumettre lorsque vous aurez complété ",
+        " le puzzle. Vos erreurs seront indiquées en rouge et vous pourrer",
+        " alors retirer les mauvaises tuiles en appuyant sur le bouton Retirer"
+        tk.Label(self, text=txt, width = 30).pack()
 
 
 image = crop_image.ImagePuzzle("images\img_forest.jpg")
