@@ -32,7 +32,8 @@ class Application():
             pc_w : largueur de la pièce
             pc_h : hauteur de la pièce
             n_pc_w : nombre de pièces en largeur
-            n_pc_h : nombre de pièces en hauteur'''
+            n_pc_h : nombre de pièces en hauteur
+            image : image type ImagePuzzle (géré par le fichier crop_image)'''
 
         # Mémorisation des paramètres
         self.margin, self.pc_w, self.pc_h = margin, pc_w, pc_h
@@ -52,7 +53,7 @@ class Application():
                              highlightthickness=0, relief='ridge')
         self.cnv.pack(side=tk.TOP)
 
-        # Création des éléments servant pour l'image
+        # Création des éléments servant pour la découpe de l'image
 
         # Récupération de la liste des tuiles de l'image
         tiles = image.crop(self.n_pc_w * self.n_pc_h)
@@ -67,7 +68,7 @@ class Application():
 
         # Conversion en matrice self.n_pc_w*self.n_pc_h
         mat_tiles = [[[self.list_tiles_i[i][0], self.list_tiles_i[i][1]]
-                     for i in range(j, self.n_pc_w+j)]
+                     for i in range(j, self.n_pc_w + j)]
                      for j in range(0, self.n_pc_h*self.n_pc_w, self.n_pc_w)]
 
         # Création de la zone de commande du jeu
@@ -80,58 +81,76 @@ class Application():
         self.submit_button = tk.Button(self.frm, text='Soumettre',
                                        command=self.submit)
         self.submit_button.pack_forget()
+        
+        '''Pour fonctionner, le jeu utilise 3 classes suplémentaires:
 
-        # Création des éléments de jeux
-        # On mémorise les caractéristques de chaque objet déplacable du canvas
+            ObjectCanvas : Mémorise toutes les informations des tuiles sur le
+            canvas (coordonnées, tag...). Chaque tuile a son ObjectCanvas
+            correspondant. L'ensemble des ObjectCanvas est ensuite mémorisé
+            dans la liste self.object_list
+
+            PlaceCanvas : Mémorise les informations de chaque emplacement
+            disponible sur le canvas. Un emplacement est soit l'emplacement
+            initiale de la tuile, soit une case du plateau de jeu.
+            L'ensemble des PlaceCanvas est mémorisé dans la liste
+            self.authorized_pos'
+
+            ObjectSelect : Mémorise lorsqu'un objet est sélectionné :
+                - Son ObjectCanvas coorespondant
+                - Son emplacement PlaceCanvas initial/de départ
+                - Et la bordure verte indiquant que l'objet est sélectionné
+        '''
+
+        # Création des éléments de jeux (tuiles + emplacements)
         self.object_list = list()
-        # Variable mémorisant l'objet en cours de déplacement
-        self.object = None
-        # On mémorise les emplacements autorisés des objets
         self.authorized_pos = list()
+        # Variable mémorisant l'objet sélectionné du type ObjectSelect
+        self.object = None
+        # Utilisé pour le tag canvas de l'objet
         id_p = 0
+        
+        # Etape 1: Création du plateau de jeu
         for i in range(self.n_pc_h):
             for j in range(self.n_pc_w):
-                # Création du plateau
                 x, y = i*self.pc_w + self.margin, j*self.pc_h + self.margin*2
                 self.cnv.create_rectangle(x, y, x + self.pc_w, y + self.pc_h)
-                # Sauvegarde les emplacement possibles
+                # Sauvegarde chaque emplacement dessiné
                 self.authorized_pos.append(PlaceCanvas(x, y, None))
 
+        # Etape 2 : Affichage des tuiles dans la pioche
         for i in range(self.n_pc_h):
             for j in range(self.n_pc_w):
                 # Affichage des images découpés
                 xi = self.pc_w*(self.n_pc_w) + self.margin*2 + \
                     i*(self.pc_w + self.margin/2)
                 yi = j*(self.pc_h + self.margin/2) + self.margin
-                tag = "Object"+str(id_p)
+                tag = "Object" + str(id_p)
                 self.cnv.create_image(xi + self.pc_w/2, yi + self.pc_h/2,
                     image=mat_tiles[i][j][0], tag=tag)
-                # Sauvegarde les coordonées du coin supérieur gauche et
-                # l'id de l'objet pour déplacement ultérieur
+                # Sauvegarde chaque objet crée
                 self.object_list.append(ObjectCanvas(xi, yi, tag,
                     mat_tiles[i][j][1]))
-                # Sauvegarde l'emplacement
+                # Sauvegarde l'emplacement correspondant
                 self.authorized_pos.append(PlaceCanvas(xi, yi,
                     self.object_list[-1]))
                 id_p += 1
 
-        # Création des éléments graphiques
+        # Création des éléments de dessin graphiques : 
+        # Création de la sinusoide
 
+        # Configuration
         # Pas suivant x
         x_increment = 1
-
         # Largeur du sinus
         x_factor = x_increment / 150
-
         # Amplitude du sinus
         y_amplitude = 40
 
-        '''Calcul tous les "x_increment" (pas) la valeur du sinus
+        '''Calcule tous les "x_increment" (pas) la valeur du sinus
         la place dans un tableau de valeur avec l'abscisse, puis crée un
         polygone avec ces coordonnées'''
 
         xy = list()
-
         i = 0
         while x < self.width:
             x = i * x_increment
@@ -151,6 +170,10 @@ class Application():
         self.cnv.bind('<ButtonRelease-1>', self.release_clic)
         self.wnd.mainloop()
 
+    '''Pour chaque 'clic' de souris différent (clic, relachement du clic
+    ou déplacement de la souris avec le clic maintenu), une fonction
+    correspondante appelle la machine a état'''
+
     def clic(self, event):
         '''Appelée si un clic a eu lieu'''
         self.clic_type = 1
@@ -168,24 +191,31 @@ class Application():
         self.state_machine(event.x, event.y)
 
     def submit(self):
-        '''Verification du puzzle'''
+        '''Verification du puzzle lorsque l'utilisateur appuis sur le bouton
+        soumettre'''
         self.victory = True
         wrong_pos_object = list()
+        # On vérifie emplacement par emplacement si ce dernier est
+        # occupé par la bonne pièce
         for k in range(self.n_pc_w * self.n_pc_h):
             if k != self.authorized_pos[k].ob.number:
                 self.victory = False
-                if self.authorized_pos[k].ob is not None:
-                    x, y = self.authorized_pos[k].x, self.authorized_pos[k].y
-                    rectangle = self.cnv.create_rectangle(x, y, x +
-                        self.pc_w, y + self.pc_h, outline='red', fill="red",
-                        width=2, stipple="gray50")
-                    current_object = ObjectSelect(self.authorized_pos[k].ob,
-                        self.authorized_pos[k])
-                    wrong_pos_object.append([current_object, rectangle])
+                # En cas de pièce au mauvaise endroit, on affiche
+                # un rectangle rouge par dessus
+                x, y = self.authorized_pos[k].x, self.authorized_pos[k].y
+                rectangle = self.cnv.create_rectangle(x, y, x +
+                    self.pc_w, y + self.pc_h, outline='red', fill="red",
+                    width=2, stipple="gray50")
+                current_object = ObjectSelect(self.authorized_pos[k].ob,
+                    self.authorized_pos[k])
+                # On mémorise la pièce et son rectangle dans une liste
+                wrong_pos_object.append([current_object, rectangle])
         if not self.victory:
+            # En cas de mauvaise combinaison, le bouton Retirer s'affiche
             self.submit_button.config(text="Retirer", command=lambda:
                 self.return_wrong_pos_object(wrong_pos_object))
         else:
+            # Sinon c'est la victoire !
             print("Won !")
 
     def return_wrong_pos_object(self, wrong_pos_object):
@@ -199,21 +229,26 @@ class Application():
         self.submit_button.pack_forget()
 
     '''
-    Il existe deux modes de déplacement :
+    Pour la machine à état, il existe deux modes de déplacement :
         Mode 1 : L'utilisateur clic une première fois sur un objet puis
         une deuxième fois sur une case vide : l'objet se déplace.
+        Mode dit 'clic and move'
         Mode 2 : L'utlisateur clic sur un objet et le déplace avec sa
-        souris jusqu'à l'emplacement voulu. Mode dit "drag and drop".'''
+        souris jusqu'à l'emplacement voulu. Mode dit 'drag and drop'.'''
 
     def state_machine(self, event_x=None, event_y=None):
         '''Machine à état contrôlant les évènements du jeu'''
         # Status = 0, la machine attend le clic initial
         if self.status == 0:
-            # Si le clic est sur un objet valide
+            # Si c'est un clic qui appelle la machine
             if self.clic_type == 1:
+                # Si le clic est sur un emplacement valide
                 result = self.is_valid_pos(event_x, event_y)
                 if result is not None:
+                    # Si l'emplacement n'est pas vide
                     if result.ob is not None:
+                        # On active la sélection sur l'objet présent
+                        # sur l'emplacement
                         self.status = 1
                         self.active_selection_on_object(result.ob, result)
 
@@ -221,7 +256,9 @@ class Application():
         elif self.status == 1:
             # Si le clic est relaché
             if self.clic_type == 3:
-                # On lance un chrono
+                # On lance un chrono, ce chrono servira à différencier
+                # un double clic rapide sur le même objet, de deux clic
+                # espacés dans le temps sur le même objet.
                 self.status = 2
                 self.chrono_stop = False
                 self.cnv.after(200, self.stop_chrono)
@@ -280,24 +317,38 @@ class Application():
                     # On revoie l'objet à sa position initiale
                     self.move_object(self.object, self.object.init_pos.x,
                         self.object.init_pos.y)
-                    # On retire la sélection active
-                    self.desactivate_curent_selection()
+                    # Si l'utilisateur re-dépose l'objet sur sa case initiale
+                    if result is not None and result.ob == self.object.object:
+                        # On ne désactive pas la sélection
+                        self.status = 1
+                    else:
+                        # Sinon, on retire la sélection active
+                        self.desactivate_curent_selection()
                 # Si l'emplacement est libre
                 else:
+                    # On y déplace l'objet
                     self.send_object_to_final_pos(self.object, result)
 
     def send_object_to_final_pos(self, object_select, pos):
-        '''Envoie l'object passé en argument vers sa position finale'''
+        '''Envoie l'object de type ObjectSelect
+        passé en argument vers sa position finale pos'''
+        # 1 : On déplace l'objet
         self.move_object(object_select, pos.x, pos.y)
+        # 2 : On met à jour l'emplacement initial 
         object_select.init_pos.ob = None
+        # 3 : On met à jour l'emplacement final
         pos.ob = object_select.object
+        # 4 : On désactive la sélection
         self.desactivate_curent_selection()
+        # 5 : On vérifie si le puzzle est complet
         self.check_puzzle_complete()
 
     def send_back_object_to_deck(self, object_select):
         '''Renvoie l'objet passé en argument dans la pioche'''
         for k in range(self.n_pc_w * self.n_pc_h, len(self.authorized_pos)):
             if self.authorized_pos[k].ob is None:
+                # On déplace l'objet dans le premier emplacement libre de la
+                # pioche trouvé
                 self.move_object(object_select, self.authorized_pos[k].x,
                     self.authorized_pos[k].y)
                 self.authorized_pos[k].ob = object_select.object
@@ -305,13 +356,15 @@ class Application():
                 return
 
     def move_object(self, object_select, x, y):
-        '''Déplace l'objet passé en argument
+        '''Déplace l'objet de type ObjectSelect passé en argument
         dans le canvas aux coordonnées x, y'''
         difx = - (object_select.object.x-x)
         dify = - (object_select.object.y-y)
+        # On met à jour les coordonnées de l'objet
         object_select.object.x = x
         object_select.object.y = y
         self.cnv.move(object_select.object.tag, difx, dify)
+        # Si l'objet contient une bordure
         if object_select.border is not None:
             self.cnv.move(object_select.border, difx, dify)
 
@@ -328,14 +381,15 @@ class Application():
         self.object = ObjectSelect(object_select, place, rectangle)
 
     def desactivate_curent_selection(self):
+        '''Désactive la sélection sur l'objet self.object en cours'''
         self.cnv.delete(self.object.border)
         self.object = None
         self.status = 0
 
     def is_valid_pos(self, x, y):
-        '''Retourne l'emplacement des coordonnées passées en argument
-        Retourne None si x, y ne correspond aux coordonnées d'aucun emplacement
-        valide'''
+        '''Retourne l'emplacement de type PlaceCanvas aux coordonnées passées
+        en argument. Retourne None si x, y ne correspond aux coordonnées
+        d'aucun emplacement valide'''
         for i in range(len(self.authorized_pos)):
             if (x >= self.authorized_pos[i].x) and \
                 (x <= self.authorized_pos[i].x + self.pc_w):
@@ -364,7 +418,7 @@ class ObjectCanvas():
         self.x, self.y, self.tag, self.number = x, y, tag, number
 
     def __str__(self):
-        '''Affiche les principales coordonnées de l'objet (utile pour debug)'''
+        '''Affiche les caractéristiques de l'objet (pour debug)'''
         r = str(self.x) + ', ' + str(self.y) + ", tag=" + str(self.tag)\
             + " number=" + str(self.number)
         return r
@@ -374,7 +428,8 @@ class ObjectSelect():
     '''Contients les caractéristiques de l'objet sélectionné
         object : contient l'objet du type ObjectCanvas
         border : contient le rectangle indiquant que l'objet est
-        sélectionné'''
+        initPos : contient l'emplacement du type PlaceCanvas de départ
+        de l'objet sélectionné'''
 
     def __init__(self, object_select, init_pos, border=None):
         self.object, self.border = object_select, border
@@ -382,13 +437,12 @@ class ObjectSelect():
 
 
 class PlaceCanvas():
-    '''Contients des emplacements possible de pièce de jeu sur le canvas'''
+    '''Contients des emplacements possible des pièce de jeu sur le canvas'''
 
     def __init__(self, x, y, occupied_by):
         '''Mémorise les caractéristiques de l'emplacement :
             x, y : coordonnées du coin supérieur gauche
-            occupied_by : objet occupant l'emplacement
-            number : numéro de l'emplacement pour la vérification'''
+            occupied_by : objet occupant l'emplacement '''
         self.x, self.y, self.ob = x, y, occupied_by
 
 
