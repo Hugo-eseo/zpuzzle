@@ -116,8 +116,7 @@ class Application():
         self.cnv.bind('<B1-Motion>', self.drag_clic)
         self.cnv.bind('<ButtonRelease-1>', self.release_clic)
         win=Winframe(self.wnd, self.sec, self.nb_coup)
-        if self.Leave == True:
-            self.wnd.destroy()
+        rules=Rules(self.wnd, self.frameHight, self.width)
         self.wnd.mainloop()
         
     def timer(self):
@@ -295,30 +294,34 @@ class Rules(tk.Toplevel):
 
     def __init__(self, parent, frame_height, frame_width):
         super().__init__(parent)
-        self.geometry("-690+350")
         self.title("Règles du jeu")
-        self.frm = tk.Frame(self.wnd, height=frame_height/3,
-                            width = frame_width/3, bg='white')
-        txt ="Votre objectif est de compléter ce puzzle avec le moins ",
-        "de déplacements possible et dans un minimum de temps"
-        tk.Label(self, text=txt, width = 30).pack()
+        self.config(bg='white')
+        txt = "Votre objectif est de compléter ce puzzle avec le moins" +\
+            "de déplacements possible et dans un minimum de temps"
+        tk.Label(self, text=txt, width=200, bg='white')
         txt = "Pour déplacer une tuile deux choix s'offre à vous:"
-        tk.Label(self, text=txt, width = 30).pack()
-        txt = "-Cliquez sur la tuile et cliquer ensuite sur",
-        " l'emplacement que vous voulez"
-        tk.Label(self, text=txt, width = 30).pack()
-        txt = "-Maintenez le clic sur la tuile et déplacez la en la",
-        " glissant sur le plateau"
-        tk.Label(self, text=txt, width = 30).pack()
+        tk.Label(self, text=txt, width=100, bg='white').pack()
+        txt = "-Cliquez sur la tuile et cliquer ensuite sur \n" +\
+            " l'emplacement que vous voulez"
+        tk.Label(self, text=txt, width=100, bg='white').pack()
+        txt = "-Maintenez le clic sur la tuile et déplacez la en \n la" +\
+            " glissant sur le plateau"
+        tk.Label(self, text=txt, width=100, bg='white').pack()
         txt = "Pour retirer une tuile, double-cliquez sur celle-ci"
-        tk.Label(self, text=txt, width = 30).pack()
-        txt = "Vous pouvez interchanger deux tuiles en glissant la",
-        " première sur la deuxième"
-        tk.Label(self, text=txt, width = 30).pack()
-        txt = "Appuyer sur le bouton soumettre lorsque vous aurez complété ",
-        " le puzzle. Vos erreurs seront indiquées en rouge et vous pourrer",
-        " alors retirer les mauvaises tuiles en appuyant sur le bouton Retirer"
-        tk.Label(self, text=txt, width = 30).pack()
+        tk.Label(self, text=txt, width=100, bg='white').pack()
+        txt = "Vous pouvez interchanger deux tuiles en glissant la \n" +\
+            " première sur la deuxième"
+        tk.Label(self, text=txt, width=150, bg='white').pack()
+        txt = "Appuyer sur le bouton soumettre lorsque vous aurez complété" +\
+            " le puzzle. Vos erreurs seront \n indiquées en rouge et vous" +\
+            " pourrez alors retirer les mauvaises tuiles \n en appuyant" +\
+            " sur le bouton Retirer"
+        tk.Label(self, text=txt, width=250, bg='white').pack()
+        txt = "Si votre puzzle est réussi, une fenêtre popup s'affichera" +\
+            " indiquant votre score final.\n Vous aurez alors le choix" +\
+            " entre rejouer ou bien quitter l'application \n \n  Bon courage!"
+        tk.Label(self, text=txt, width=250, bg='white').pack()
+        tk.Button(self, text='OK', command=self.destroy).pack(side=tk.BOTTOM)
 
 
 image = crop_image.ImagePuzzle("images\img_forest.jpg")
