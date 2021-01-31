@@ -63,7 +63,7 @@ class SelectImage():
                   command=self.begin_game).place(x=170, y=360)
         self.win.mainloop()
 
-    def fait_limage(self):
+    def display(self):
         '''Fonction qui sert pour les trois à venir, ouvre l'image, la met à
         la taille souhaitée, la convertie pour être utilisable par Tkinter,
         et l'affiche dans le canva central en mémorisant son tag'''
@@ -83,7 +83,7 @@ class SelectImage():
             return
         self.cnv_middle.delete(self.tag)
         self.num_image += 1
-        self.fait_limage()
+        self.display()
 
     def previous_image(self):
         '''Affiche l'image précédente du dossier images
@@ -93,13 +93,13 @@ class SelectImage():
             return
         self.cnv_middle.delete(self.tag)
         self.num_image -= 1
-        self.fait_limage()
+        self.display()
 
     def first_image(self):
         '''Retourne au début de la liste d'images'''
         self.cnv_middle.delete(self.tag)
         self.num_image = 0
-        self.fait_limage()
+        self.display()
 
     def begin_game(self):
         '''Lance le jeu avec l'image affichée à l'écran'''
