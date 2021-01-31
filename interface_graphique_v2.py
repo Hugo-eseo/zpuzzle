@@ -609,22 +609,22 @@ class Application():
 
     def first_level(self):
         '''Oui'''
-        self.wnd.destroy()
+        self.stop_game()
         Application(2, 2, self.image, self.ratio)
 
     def second_level(self):
         '''Oui'''
-        self.wnd.destroy()
+        self.stop_game()
         Application(5, 5, self.image, self.ratio)
 
     def third_level(self):
         '''Oui'''
-        self.wnd.destroy()
+        self.stop_game()
         Application(6, 6, self.image, self.ratio)
 
     def change_image(self):
         '''Oui'''
-        self.wnd.destroy()
+        self.stop_game()
         SelectImage("images")
 
 
