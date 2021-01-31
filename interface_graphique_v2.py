@@ -303,13 +303,13 @@ class Application():
         if self.chrono_on[0]:
             if self.sec >= 0 and self.min == 0  and self.hour == 0:
                 string = "Temps écoulé: " + str(self.sec) + " s"
-            if self.min == 60 and self.sec == 60:
+            if self.min == 60 and self.sec == 60 or self.hour >= 1:
                 self.hour += 1
                 self.min = 0
                 self.sec = 0
                 string = "Temps écoulé: " + str(self.hour) + " h :" +\
                     str(self.min) + " m :" + str(self.sec) + " s"
-            if self.sec == 60:
+            if self.sec == 60 or self.min >= 1:
                 self.sec = 0
                 self.min += 1
                 string = "Temps écoulé: " + str(self.min) + ' m :' +\
