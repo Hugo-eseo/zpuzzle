@@ -48,6 +48,7 @@ class Application():
         # Création de la fenêtre
         self.wnd = tk.Tk()
         self.wnd.title("ZPuzzle")
+        self.wnd.resizable(width=False, height=False)
 
         # Création de la zone de dessin
         self.cnv = tk.Canvas(self.wnd, width=self.width,
@@ -611,8 +612,9 @@ class Rules(tk.Toplevel):
         # Configuration de la fenêtre
         self.title("Règles du jeu")
         self.config(bg='white')
+        self.resizable(width=False, height=False)
         # Positionnement au centre de l'écran et en premier plan
-        self.geometry("-500+275")
+        #self.geometry("-500+275")
         self.wm_attributes("-topmost", 1)
         # Création des bandeaux de décoration
         frm = tk.Frame(self, height=25, width=frame_width, bg='green')
