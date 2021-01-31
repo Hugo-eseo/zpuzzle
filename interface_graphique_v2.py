@@ -49,9 +49,9 @@ class Application():
         self.cnv_height = int((5/10) * screen_height)
         
         # La hauteur de la frame de commande prend la valeur 3/10 de la hauteur
-        # du canvas, celle des scores 1/20
+        # du canvas, celle des scores 2/20
         self.frame_height = int((3/10) * self.cnv_height)
-        self.top_frame_height = int((1/20) * self.cnv_height)
+        self.top_frame_height = int((2/20) * self.cnv_height)
 
         # La hauteur totale de la fenêtre est donc
         self.height = self.cnv_height + self.frame_height
@@ -283,7 +283,6 @@ class Application():
         # On vérifie emplacement par emplacement si ce dernier est
         # occupé par la bonne pièce
         for k in range(self.n_pc_w * self.n_pc_h):
-            print(k, ',', self.authorized_pos[k].ob.number)
             if k != self.authorized_pos[k].ob.number:
                 self.victory = False
                 # En cas de pièce au mauvaise endroit, on affiche
