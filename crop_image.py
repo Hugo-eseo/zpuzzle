@@ -2,7 +2,7 @@
 """
 Created on Thu Jan 21 14:03:28 2021
 
-@author: odial
+@author: Groupe 3 : Aurélie, Tristan et Hugo BOUY
 """
 
 import math
@@ -13,13 +13,6 @@ from PIL import Image, ImageTk
 class ImagePuzzle():
     '''Prend une image en paramètre et effectue des opérations dessus'''
     def __init__(self, image):
-        '''
-        Initiatilisation :
-        self.image : image voulue
-        self.size : tuple : (width,height)
-        self.wdith : longueur de l'image
-        self.height : hauteur de l'image
-        '''
         self.image = Image.open(image)
         self.size = self.image.size
         self.width = self.size[0]

@@ -71,6 +71,7 @@ class Welcome():
         self.tag='image' + str(self.num_image)
         self.cnv_middle.create_image(1000/4, 400/2,
                                      image = self.image_tk, tag=self.tag)
+        print(self.num_image)
         
     def previous_image(self):
         '''Oui'''
@@ -96,7 +97,6 @@ class Welcome():
         self.tag='image' + str(self.num_image)
         self.cnv_middle.create_image(1000/4, 400/2,
                                      image = self.image_tk, tag=self.tag)
-        
     def begin_game(self):
         self.win.destroy()
         image_chosen = self.list_images[self.num_image]
@@ -105,3 +105,4 @@ class Welcome():
         interface_graphique.Application(40, 70*ratio_wh, 70, 5, 5, image)
         
 Welcome("images")
+       
