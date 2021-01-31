@@ -111,7 +111,7 @@ class Application():
         self.chrono.pack(side=tk.LEFT, pady=5, padx=5)
 
         # Remise à zéro du chrono
-        self.sec = 0
+        self.sec = 55
         self.min = 0
         self.hour = 0
         self.chrono_on = [False, None]
@@ -301,21 +301,22 @@ class Application():
         ''' Méthode permettant le suivi du temps écoulé après le lancement
         du jeu '''
         if self.chrono_on[0]:
-            if self.sec >= 0 and self.min < 1  and self.hour < 1:
+            if self.sec >= 0 and self.min == 0  and self.hour == 0:
                 string = "Temps écoulé: " + str(self.sec) + " s"
-                if self.min == 59 and self.sec == 59:
-                    self.hour += 1
-                    self.min = 0
-                    self.sec = 0
-                if self.sec == 59:
-                    self.sec = 0
-                    self.min += 1
-            else:
-                self.sec += 1
-                string = 'Temps écoulé: ' + str(self.hour) + ' h :' +\
-                str(self.min) + ' m : ' + str(self.sec) + ' s'
-                self.chrono_on[1] = self.wnd.after(1000, self.timer)
-                self.chrono.config(text=string)
+            if self.min == 60 and self.sec == 60:
+                self.hour += 1
+                self.min = 0
+                self.sec = 0
+                string = "Temps écoulé: " + str(self.hour) + " h :" +\
+                    str(self.min) + " m :" + str(self.sec) + " s"
+            if self.sec == 60:
+                self.sec = 0
+                self.min += 1
+                string = "Temps écoulé: " + str(self.min) + ' m :' +\
+                    str(self.sec) + ' s'
+            self.sec += 1
+            self.chrono_on[1] = self.wnd.after(1000, self.timer)
+            self.chrono.config(text=string)
 
     def update_score(self):
         '''Méthode affichant le score du joueur'''
