@@ -33,7 +33,8 @@ class Application():
 
         # Mémorisation des paramètres
         self.n_pc_w, self.n_pc_h = n_pc_w, n_pc_h
-
+        self.image = image
+        self.ratio = ratio
         # Création de la fenêtre
         self.wnd = tk.Tk()
         self.wnd.title("ZPuzzle")
@@ -72,9 +73,8 @@ class Application():
         # Création des éléments servant pour la découpe de l'image
 
         # Récupération de la liste des tuiles de l'image
-        self.ratio_wh = self.image.width/self.image.height
         tiles = image.crop(self.n_pc_w * self.n_pc_h)
-        list_tiles = image.createTilesTk(tiles, self.pc_w, self.pc_h)
+        list_tiles = image.create_tiles_tk(tiles, self.pc_w, self.pc_h)
 
         # Ajout d'un indice pour la vérification
         self.list_tiles_i = [[list_tiles[i], i]
@@ -87,6 +87,7 @@ class Application():
         mat_tiles = [[[self.list_tiles_i[i][0], self.list_tiles_i[i][1]]
                      for i in range(j, self.n_pc_w + j)]
                      for j in range(0, self.n_pc_h*self.n_pc_w, self.n_pc_w)]
+        print(self.image.dominant_color())
 
         # Création de la zone de commande du jeu
         self.frm = tk.Frame(self.wnd, height=self.frameHeight,
@@ -700,5 +701,6 @@ class Rules(tk.Toplevel):
         tk.Label(self, text=txt, bg='white').pack()
 
 
-'''image = crop_image.ImagePuzzle("images\img_forest.jpg")
-boite = Application(5, 5, image)'''
+image = crop_image.ImagePuzzle("images\mario.jpg")
+ratio = image.width/image.height
+boite = Application(5, 5, image, ratio)

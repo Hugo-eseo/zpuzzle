@@ -70,6 +70,20 @@ class ImagePuzzle():
         # random.shuffle(tile_tk)  # mélange de l'ordre des pièces
         return tile_tk
 
+    def dominant_color(self):
+        '''Trouve la couleur la plus présente dans l'image sélectionnée'''
+
+        '''Création d'une liste pixels qui contient des tuples avec la couleur
+        d'un pixel et le nombre de fois que ce pixel apparaît'''
+        pixels = self.image.getcolors(self.width * self.height)
+
+        # Trouver la couleur qui revient le plus et la retourner
+        self.dominant_color = pixels[0]
+        for number, color in pixels:
+            if number > self.dominant_color[0]:
+                self.dominant_color = color
+        return self.dominant_color
+    
 
 def image_choice(folder):
     list_images = os.listdir(folder)
