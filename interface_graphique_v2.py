@@ -6,7 +6,6 @@ Created on Thu Jan 21 14:23:08 2021
 """
 
 import tkinter as tk
-
 import random
 import math
 from tkinter.messagebox import askyesno
@@ -73,6 +72,7 @@ class Application():
         # Création des éléments servant pour la découpe de l'image
 
         # Récupération de la liste des tuiles de l'image
+        self.ratio_wh = self.image.width/self.image.height
         tiles = image.crop(self.n_pc_w * self.n_pc_h)
         list_tiles = image.createTilesTk(tiles, self.pc_w, self.pc_h)
 
@@ -120,6 +120,15 @@ class Application():
         self.submit_button = tk.Button(self.frm, text='Soumettre',
                                        command=self.submit)
         self.submit_button.pack_forget()
+
+        tk.Button(self.frm, text = 'Niveau 1',
+             command = self.first_level).pack(side = tk.LEFT, anchor = 'nw', padx=3)
+        tk.Button(self.frm, text='Niveau 2',
+             command = self.second_level).pack(side = tk.LEFT, anchor = 'nw', padx= 3)
+        tk.Button(self.frm, text = 'Niveau 3',
+             command = self.third_level).pack(side = tk.LEFT, anchor = 'nw', padx = 3)
+        tk.Button(self.frm, text="Changer d'image",
+             command = self.change_image).pack(side=tk.LEFT, anchor='nw')
 
         # Création des Labels d'information
 
@@ -549,6 +558,24 @@ class Application():
                 self.submit_button.pack_forget()
                 return
         self.submit_button.pack()
+        
+    def first_level(self):
+        '''Oui'''
+        self.wnd.destroy()
+        Application(40, 70*self.ratio_wh, 70, 5, 5, self.image)
+    def second_level(self):
+        '''Oui'''
+        self.wnd.destroy()
+        Application(50, 60*self.ratio_wh, 60, 6, 6, self.image)
+
+    def third_level(self):
+        '''Oui'''
+        self.wnd.destroy()
+        Application(35, 60*self.ratio_wh, 60, 7, 7, self.image)
+    def change_image(self):
+        '''Oui'''
+        self.wnd.destroy()
+        main.Welcome("images")
 
 
 class ObjectCanvas():
@@ -673,5 +700,5 @@ class Rules(tk.Toplevel):
         tk.Label(self, text=txt, bg='white').pack()
 
 
-image = crop_image.ImagePuzzle("images\img_forest.jpg")
-boite = Application(5, 5, image)
+'''image = crop_image.ImagePuzzle("images\img_forest.jpg")
+boite = Application(5, 5, image)'''

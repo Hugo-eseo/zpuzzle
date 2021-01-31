@@ -6,14 +6,13 @@ Created on Wed Jan 13 14:00:40 2021
 """
 
 #Ceci est le main
+
 import tkinter as tk
-import math
 import os
 from PIL import Image, ImageTk
 
-import interface_graphique_v2
-
 import crop_image
+import interface_graphique
 
 class Welcome():
     def __init__(self, folder):
@@ -56,7 +55,7 @@ class Welcome():
         self.beginning.place(x=75,y=230)
         self.begin_game = tk.Button(self.cnv_middle, text='Jouer avec cette image',
                               command=self.begin_game)
-        self.begin_game.place(x=150,y=360)
+        self.begin_game.place(x=170,y=360)
         self.win.mainloop()
         
     def next_image(self):
@@ -87,7 +86,6 @@ class Welcome():
         self.tag='image' + str(self.num_image)
         self.cnv_middle.create_image(1000/4, 400/2,
                                      image = self.image_tk, tag=self.tag)
-        print(self.num_image)
         
     def first_image(self):
         self.cnv_middle.delete(self.tag)
@@ -99,16 +97,12 @@ class Welcome():
         self.tag='image' + str(self.num_image)
         self.cnv_middle.create_image(1000/4, 400/2,
                                      image = self.image_tk, tag=self.tag)
-        print(self.num_image)
-        
     def begin_game(self):
-        global ratio_wh
         self.win.destroy()
         image_chosen = self.list_images[self.num_image]
         image = crop_image.ImagePuzzle("images\\" + str(image_chosen))
-        print("images\\" + str(image_chosen))
         ratio_wh = image.width/image.height
-        #print(ratio_wh)
-        interface_graphique_v2.Application(40, 70*ratio_wh, 70, 5, 5, image)
+        interface_graphique.Application(40, 70*ratio_wh, 70, 5, 5, image)
         
-        
+Welcome("images")
+       
