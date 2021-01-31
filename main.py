@@ -12,7 +12,7 @@ import os
 from PIL import Image, ImageTk
 
 import crop_image
-import interface_graphique
+import interface_graphique_v2
 
 class Welcome():
     def __init__(self, folder):
@@ -102,7 +102,7 @@ class Welcome():
         image_chosen = self.list_images[self.num_image]
         image = crop_image.ImagePuzzle("images\\" + str(image_chosen))
         ratio_wh = image.width/image.height
-        interface_graphique.Application(40, 70*ratio_wh, 70, 5, 5, image)
+        interface_graphique_v2.Application(5, 5, image, ratio_wh)
         
 Welcome("images")
        

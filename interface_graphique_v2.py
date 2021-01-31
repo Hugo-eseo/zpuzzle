@@ -12,7 +12,6 @@ from tkinter.messagebox import askyesno
 
 import crop_image
 
-
 class Application():
     '''Contients des objets correspondant à une fenêtre de jeu'''
 
@@ -25,14 +24,16 @@ class Application():
     # Utilisée pour le callback de la machie à état
     chrono_stop = True
 
-    def __init__(self, n_pc_w, n_pc_h, image):
+    def __init__(self, n_pc_w, n_pc_h, image, ratio):
         '''Crée une fenêtre tkinter. Prend en paramètres :
             n_pc_w : nombre de pièces en largeur
             n_pc_h : nombre de pièces en hauteur
-            image : image type ImagePuzzle (géré par le fichier crop_image)'''
+            image : image type ImagePuzzle (géré par le fichier crop_image)
+            ratio : rapport entre la largeur et la hauteur de l'image'''
 
         # Mémorisation des paramètres
-        self.n_pc_w, self.n_pc_h = n_pc_w, n_pc_h
+        self.n_pc_w, self.n_pc_h, self.ratio = n_pc_w, n_pc_h, ratio
+        self.image = image
 
         # Création de la fenêtre
         self.wnd = tk.Tk()
@@ -45,7 +46,7 @@ class Application():
         screen_width = self.wnd.winfo_screenwidth()
 
         self.pc_h = int(screen_height/10)
-        self.pc_w = self.pc_h
+        self.pc_w = self.pc_h * ratio
         self.margin = self.pc_h/4
 
         # La fenêtre n'est pas redimentionnable
@@ -72,9 +73,8 @@ class Application():
         # Création des éléments servant pour la découpe de l'image
 
         # Récupération de la liste des tuiles de l'image
-        self.ratio_wh = self.image.width/self.image.height
         tiles = image.crop(self.n_pc_w * self.n_pc_h)
-        list_tiles = image.createTilesTk(tiles, self.pc_w, self.pc_h)
+        list_tiles = image.create_tiles_tk(tiles, self.pc_w, self.pc_h)
 
         # Ajout d'un indice pour la vérification
         self.list_tiles_i = [[list_tiles[i], i]
@@ -562,16 +562,16 @@ class Application():
     def first_level(self):
         '''Oui'''
         self.wnd.destroy()
-        Application(40, 70*self.ratio_wh, 70, 5, 5, self.image)
+        Application(5, 5, self.image, self.ratio)
     def second_level(self):
         '''Oui'''
         self.wnd.destroy()
-        Application(50, 60*self.ratio_wh, 60, 6, 6, self.image)
+        Application(6, 6, self.image, self.ratio)
 
     def third_level(self):
         '''Oui'''
         self.wnd.destroy()
-        Application(35, 60*self.ratio_wh, 60, 7, 7, self.image)
+        Application(7, 7, self.image, self.ratio)
     def change_image(self):
         '''Oui'''
         self.wnd.destroy()
