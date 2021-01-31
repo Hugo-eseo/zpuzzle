@@ -305,7 +305,7 @@ class Application():
                 # un rectangle rouge par dessus
                 x, y = self.authorized_pos[k].x, self.authorized_pos[k].y
                 rectangle = self.cnv.create_rectangle(x, y, x + self.pc_w, y +
-                    self.pc_h, outline='red',  fill="red", width=2,
+                    self.pc_h, outline='red', fill="red", width=2,
                     stipple="gray50")
                 current_object = ObjectSelect(self.authorized_pos[k].ob,
                                               self.authorized_pos[k])
@@ -613,7 +613,7 @@ class Application():
         Application(2, 2, self.image, self.ratio)
 
     def second_level(self):
-         '''Relance l'application avec le second niveau : 5x5'''
+        '''Relance l'application avec le second niveau : 5x5'''
         self.stop_game()
         Application(5, 5, self.image, self.ratio)
 
@@ -627,7 +627,7 @@ class Application():
         self.stop_game()
         SelectImage("images")
 
- 
+
 class ObjectCanvas():
     '''Contients les caractéristiques d'objets du canvas'''
 
@@ -773,6 +773,7 @@ class Rules(tk.Toplevel):
             " entre rejouer ou bien quitter l'application \n \n" +\
             "Bon courage ! \n "
         tk.Label(self, text=txt, bg='white').pack()
+
 
 class SelectImage():
     '''Fenêtre d'accueil permettant de choisir l'image à reconstituer'''
