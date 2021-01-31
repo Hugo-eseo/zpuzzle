@@ -18,7 +18,7 @@ class Application():
     '''Contients des objets correspondant à une fenêtre de jeu'''
 
     # Hauteur de la zone de commande
-    frameHight = 200
+    frameHeight = 200
     # Utilisée pour connaître l'issue du jeu
     victory = False
     # Utilisée pour connaître le type de clic
@@ -48,6 +48,10 @@ class Application():
         # Création de la fenêtre
         self.wnd = tk.Tk()
         self.wnd.title("ZPuzzle")
+        string = str(int(self.width)) + 'x' + \
+            str(int(self.height + self.frameHeight))
+        print(string)
+        self.wnd.geometry(string)
         self.wnd.resizable(width=False, height=False)
 
         # Création de la zone de dessin
@@ -75,13 +79,13 @@ class Application():
                      for j in range(0, self.n_pc_h*self.n_pc_w, self.n_pc_w)]
 
         # Création de la zone de commande du jeu
-        self.frm = tk.Frame(self.wnd, height=self.frameHight,
+        self.frm = tk.Frame(self.wnd, height=self.frameHeight,
                             width=self.width, bg='green')
         self.frm.pack_propagate(0)
         self.frm.pack(side=tk.BOTTOM, expand=True)
 
         '''# Création de la fenêtre de réussite et de ses éléments
-        self.frmr = tk.Frame(self.wnd, height=(self.frameHight)/2,
+        self.frmr = tk.Frame(self.wnd, height=(self.frameHeight)/2,
             width=(self.width)/2, bg='white')
         self.total_attempt = tk.Label(self.frmr, text='Déplacements totaux: ',
             width=10)'''
