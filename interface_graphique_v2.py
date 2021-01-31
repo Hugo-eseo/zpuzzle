@@ -101,18 +101,19 @@ class Application():
                            bg='green', fg='white',
                            font=('Franklin Gothic Demi Cond', 12))
         self.sc.pack(side=tk.LEFT, pady=5, padx=5)
-        self.attempt = tk.Label(self.top_frame, text='Déplacement : 0',
+        self.attempt = tk.Label(self.top_frame, text='Déplacements : 0',
                                 width=17, bg='green', fg='white',
                                 font=('Franklin Gothic Demi Cond', 12))
         self.attempt.pack(side=tk.LEFT, pady=5, padx=5)
         self.chrono = tk.Label(self.top_frame, text='Temps écoulé : 0s',
-                               width=20, bg='green', fg='white',
+                               width=30, bg='green', fg='white',
                                font=('Franklin Gothic Demi Cond', 12))
         self.chrono.pack(side=tk.LEFT, pady=5, padx=5)
 
         # Remise à zéro du chrono
         self.sec = 0
         self.min = 0
+        self.hour = 0
         self.chrono_on = [False, None]
         self.move = 0
 
@@ -206,6 +207,7 @@ class Application():
         self.cnv.create_polygon(xy, fill='green')
 
         Rules(self.wnd, 200, 500)
+        Winframe(self.wnd, self.sec, self.move)
         self.wnd.protocol("WM_DELETE_WINDOW", self.stop_game)
         self.wnd.mainloop()
 
@@ -299,13 +301,17 @@ class Application():
         ''' Méthode permettant le suivi du temps écoulé après le lancement
         du jeu '''
         if self.chrono_on[0]:
+            if self.min == 59 and self.sec == 59:
+                self.hour += 1
+                self.min = 0
+                self.sec = 0
             if self.sec == 59:
                 self.sec = 0
                 self.min += 1
             else:
                 self.sec += 1
-            string = 'Temps écoulé: ' + str(self.min) + ' m : ' +\
-                str(self.sec) + ' s'
+            string = 'Temps écoulé: ' + str(self.hour) + ' h :' + str(self.min) +\
+                ' m : ' + str(self.sec) + ' s'
             self.chrono_on[1] = self.wnd.after(1000, self.timer)
             self.chrono.config(text=string)
 
@@ -564,41 +570,56 @@ class Winframe(tk.Toplevel):
 
     def __init__(self, parent, sec, nbcoup):
         super().__init__(parent)
+        # Configuration de la fenêtre
         self.geometry("-690+350")
+        self.wm_attributes('-topmost', 1)
         self.title("Score final")
         self.config(bg='white')
+        # Définition du score total
         self.time_total = 'Temps total: ' + str(sec)
         self.nbmove_total = 'Nombre de déplacements totaux :' + str(nbcoup)
         tk.Label(self, text=self.time_total, bg='white').pack(pady=10)
         tk.Label(self, text=self.nbmove_total, bg='white').pack(pady=10)
+        # Création des boutons pour rejouer ou quitter
         tk.Button(self, text="Recommencer", command=self.destroy).pack()
         tk.Button(self, text='Quitter', command=lambda: self.leave(parent))\
             .pack()
 
     def leave(self, wnd):
-        '''Permet de quitter le jeu à partir de la fenêtre des scores'''
+        '''Permet de quitter le jeu à partir de la fenêtre des scores à l'aide
+        d'une fenêtre popup'''
+        # Affiche la fenêtre popup au premier plan
+        wnd.wm_attributes('-topmost', 1)
         if askyesno('Vous êtes sur le point de quitter',
                     'Êtes-vous sûr de vouloir quitter ?'):
             wnd.destroy()
-        else:
-            self.destroy()
 
 
 class Rules(tk.Toplevel):
-    '''Contient les éléments qui résumment le score du joueur'''
+    '''Fenêtre affichant les règles à suivre pour jouer au jeu'''
 
     def __init__(self, parent, frame_height, frame_width):
         super().__init__(parent)
+        # Configuration de la fenêtre
         self.title("Règles du jeu")
         self.config(bg='white')
+        # Positionnement au centre de l'écran et en premier plan
         self.geometry("-500+275")
-        frm = tk.Frame(self, height=23, width=frame_width, bg='green')
-        frm_bot = tk.Frame(self, height=23, width=frame_width, bg='green')
+        self.wm_attributes("-topmost", 1)
+        # Création des bandeaux de décoration
+        frm = tk.Frame(self, height=25, width=frame_width, bg='green')
+        frm_bot = tk.Frame(self, height=25, width=frame_width, bg='green')
         frm.pack_propagate(0)
         frm_bot.pack_propagate(0)
         frm.pack(side=tk.TOP)
         frm_bot.pack(side=tk.BOTTOM)
-        txt = "Votre objectif est de compléter ce puzzle avec le moins" +\
+        tk.Label(frm, text="Bonjour et bienvenue dans ZPUZZLE !",
+                 bg='green', fg='white', font=('Franklin Gothic Demi Cond',
+                                               11)).pack()
+        tk.Button(frm_bot, text='OK', relief='flat', bg='white',
+                  command=self.destroy).pack(side=tk.BOTTOM)
+        # Définition des règles
+        txt = " \n Votre objectif est de compléter ce puzzle avec le moins" +\
             " de \n déplacements possible et dans un minimum de temps"
         tk.Label(self, text=txt, bg='white').pack()
         txt = "Pour déplacer une tuile deux choix s'offrent à vous:"
@@ -621,13 +642,9 @@ class Rules(tk.Toplevel):
         tk.Label(self, text=txt, bg='white').pack()
         txt = "Si votre puzzle est réussi, une fenêtre popup s'affichera" +\
             " indiquant votre score final.\n Vous aurez alors le choix" +\
-            " entre rejouer ou bien quitter l'application \n \n  Bon courage !"
+            " entre rejouer ou bien quitter l'application \n \n" +\
+            "Bon courage ! \n "
         tk.Label(self, text=txt, bg='white').pack()
-        tk.Button(frm_bot, text='OK', relief='flat',
-                  command=self.destroy).pack(side=tk.BOTTOM)
-        tk.Label(frm, text="BONJOUR ET BIENVENUE DANS ZPUZZLE !",
-                 bg='green', fg='white', font=('Franklin Gothic Demi Cond',
-                                               11)).pack()
 
 
 image = crop_image.ImagePuzzle("images\img_forest.jpg")
