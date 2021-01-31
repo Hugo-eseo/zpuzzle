@@ -176,8 +176,6 @@ class Application():
         self.chrono_label_on = [False, None]
         self.move = 0
 
-        #Winframe(self.wnd, self.sec, self.nb_coup) #TEMPORAIRE
-
         '''Pour fonctionner, le jeu utilise 3 classes suplémentaires:
 
             ObjectCanvas : Mémorise toutes les informations des tuiles sur le
@@ -320,7 +318,11 @@ class Application():
             self.cnv.unbind('<ButtonRelease-1>')
         else:
             # Sinon c'est la victoire !
-            print("Won !")
+            self.chrono_label_on[0] = False
+            Winframe(self.wnd, self.sec, self.move)
+            self.cnv.unbind('<Button-1>')
+            self.cnv.unbind('<B1-Motion>')
+            self.cnv.unbind('<ButtonRelease-1>')
 
     def return_wrong_pos_object(self, wrong_pos_object):
         '''Retourne les pièces étant à la mauvaise position à un emplacement
