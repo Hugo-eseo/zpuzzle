@@ -103,10 +103,12 @@ class SelectImage():
 
     def begin_game(self):
         '''Lance le jeu avec l'image affichée à l'écran'''
-        self.win.destroy()
         image_chosen = self.list_images[self.num_image]
         image = crop_image.ImagePuzzle("images\\" + str(image_chosen))
         ratio_wh = image.width/image.height
+        result = interface_graphique_v2.Rules(self.win)
+        self.win.wait_window(result)
+        self.win.destroy()
         interface_graphique_v2.Application(5, 5, image, ratio_wh)
 
  
