@@ -28,13 +28,13 @@ class Welcome():
         self.frm_right.pack(side=tk.RIGHT)
         self.list_images = os.listdir(self.folder)
         
-        self.image = Image.open("images\\" + self.list_images[5])
+        self.image = Image.open("images\\" + self.list_images[0])
         ratio_wh = self.image.size[0]/self.image.size[1]
         self.image = self.image.resize((int(300*ratio_wh),300))
         self.image_tk = ImageTk.PhotoImage(self.image)
         tag="oui"
         
-        self.cnv_middle.create_image(1000/2,
+        self.cnv_middle.create_image(1000/4,
                              800/2,
                            image = self.image_tk, tag=tag)
         self.wnd.mainloop()
@@ -179,20 +179,17 @@ class Application():
     
     def first_level(self):
         '''Oui'''
-        ratio_wh = self.image.width/self.image.height
         self.wnd.destroy()
-        boite=Application(40, 70*ratio_wh, 70, 5, 5, self.image)
+        Application(40, 70*ratio_wh, 70, 5, 5, self.image)
     def second_level(self):
         '''Oui'''
-        ratio_wh = self.image.width/self.image.height
         self.wnd.destroy()
-        boite=Application(50, 60*ratio_wh, 60, 6, 6, self.image)
+        Application(50, 60*ratio_wh, 60, 6, 6, self.image)
 
     def third_level(self):
         '''Oui'''
-        ratio_wh = self.image.width/self.image.height
         self.wnd.destroy()
-        boite=Application(35, 60*ratio_wh, 60, 7, 7, self.image)
+        Application(35, 60*ratio_wh, 60, 7, 7, self.image)
     def change_image(self):
         '''Oui'''
         self.wnd.destroy()
@@ -330,14 +327,13 @@ class PlaceCanvas():
             availability : si l'emplacement est disponible ou occupé'''
         self.x, self.y, self.av = x, y, availability
 
-welcome = Welcome("images")
-'''
+#welcome = Welcome("images")
+
+
 chosen_image = crop_image.image_choice("images")
 image = crop_image.ImagePuzzle("images\\" + str(chosen_image))
 ratio_wh = image.width/image.height
-print(image.width,image.height,ratio_wh)
-boite=Application(40, 70*ratio_wh, 70, 5, 5, image)
-'''
+Application(40, 70*ratio_wh, 70, 5, 5, image)
 
 
 
