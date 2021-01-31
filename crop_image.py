@@ -68,7 +68,6 @@ class ImagePuzzle():
             tile_tk.append(ImageTk.PhotoImage(i.resize((int(piece_width),
                                                         int(piece_height)))))
         return tile_tk
-
     def dominant_color(self):
         '''Trouve la couleur la plus présente dans l'image sélectionnée'''
 

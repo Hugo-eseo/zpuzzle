@@ -575,24 +575,25 @@ class Application():
                 self.submit_button.pack_forget()
                 return
         self.submit_button.pack()
-        
+
     def first_level(self):
-        '''Oui'''
+        '''Relance l'application avec le premier niveau : 5x5'''
         self.wnd.destroy()
         Application(5, 5, self.image, self.ratio)
+
     def second_level(self):
-        '''Oui'''
+        '''Relance l'application avec le second niveau : 6x6'''
         self.wnd.destroy()
         Application(6, 6, self.image, self.ratio)
 
     def third_level(self):
-        '''Oui'''
+        '''Relance l'application avec le troisième niveau : 7x7'''
         self.wnd.destroy()
         Application(7, 7, self.image, self.ratio)
+
     def change_image(self):
-        '''Oui'''
+        '''Relance l'application sur la fenêtre de selection d'image'''
         self.wnd.destroy()
-        #main.Welcome("images")
 
 
 class ObjectCanvas():
