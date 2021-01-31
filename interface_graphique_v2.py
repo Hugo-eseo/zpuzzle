@@ -608,26 +608,26 @@ class Application():
         self.submit_button.grid(column=2, row=1, sticky='n', pady=5)
 
     def first_level(self):
-        '''Oui'''
+        '''Relance l'application avec le premier niveau : 2x2'''
         self.stop_game()
         Application(2, 2, self.image, self.ratio)
 
     def second_level(self):
-        '''Oui'''
+         '''Relance l'application avec le second niveau : 5x5'''
         self.stop_game()
         Application(5, 5, self.image, self.ratio)
 
     def third_level(self):
-        '''Oui'''
+        '''Relance l'application avec le troisième niveau : 6x6'''
         self.stop_game()
         Application(6, 6, self.image, self.ratio)
 
     def change_image(self):
-        '''Oui'''
+        '''Relance l'application sur la fenêtre de selection d'image'''
         self.stop_game()
         SelectImage("images")
 
-
+ 
 class ObjectCanvas():
     '''Contients les caractéristiques d'objets du canvas'''
 
