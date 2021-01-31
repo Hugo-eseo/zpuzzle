@@ -814,7 +814,10 @@ class SelectImage():
         self.cnv_middle.create_image(1000/4, 400/2,
                                      image=self.image_tk, tag=self.tag)
 
-        # Création des boutons
+        # Création du label et des boutons
+        txt = "Choisissez l'image avec laquelle vous voulez jouer"
+        tk.Label(self.cnv_middle, text=txt, bg='white',
+                 font=('Franklin Gothic Demi Cond', 11)).place(x=105, y=20)
         tk.Button(self.frm_right, text='Image suivante',
                   command=self.next_image).place(x=75, y=190)
         tk.Button(self.frm_left, text='Image précédente',
@@ -822,7 +825,7 @@ class SelectImage():
         tk.Button(self.frm_left, text='Retourner à la première image',
                   command=self.first_image).place(x=75, y=230)
         tk.Button(self.cnv_middle, text='Jouer avec cette image',
-                  command=self.begin_game).place(x=170, y=360)
+                  command=self.begin_game).place(x=180, y=360)
         self.win.mainloop()
 
     def display(self):
@@ -830,7 +833,7 @@ class SelectImage():
         la taille souhaitée, la convertie pour être utilisable par Tkinter,
         et l'affiche dans le canva central en mémorisant son tag'''
         self.image = crop_image.Image.open("images\\" +
-            self.list_images[self.num_image])
+                                           self.list_images[self.num_image])
         self.ratio_wh = self.image.size[0]/self.image.size[1]
         self.image = self.image.resize((int(300*self.ratio_wh), 300))
         self.image_tk = crop_image.ImageTk.PhotoImage(self.image)
