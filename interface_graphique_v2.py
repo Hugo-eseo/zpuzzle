@@ -45,28 +45,44 @@ class Application():
         screen_height = self.wnd.winfo_screenheight()
         screen_width = self.wnd.winfo_screenwidth()
 
-        self.pc_h = int(screen_height/10)
-        self.pc_w = self.pc_h * ratio
+        # La hauteur du canvas est égale à 5/10 de la hauteur de l'écran
+        self.cnv_height = int((5/10) * screen_height)
+        
+        # La hauteur de la frame de commande prend la valeur 3/10 de la hauteur
+        # du canvas, celle des scores 1/20
+        self.frame_height = int((3/10) * self.cnv_height)
+        self.top_frame_height = int((1/20) * self.cnv_height)
+
+        # La hauteur totale de la fenêtre est donc
+        self.height = self.cnv_height + self.frame_height
+
+        # On calcul la hauteur d'une pièce
+        self.pc_h = int((self.cnv_height - self.top_frame_height)/
+            (self.n_pc_h + (1/4)*(self.n_pc_h + 3)))
+
+        # La marge est égale à 1/4 de la hauteur d'une pièce
         self.margin = self.pc_h/4
 
+        # On calcule la largeur d'une pièce avec le ratio de l'image
+        self.pc_w = int(self.pc_h*self.ratio)
+
+        # On en déduit la largeur du canvas et de la fenêtre
+        self.cnv_width = int(2*self.pc_w*self.n_pc_w +
+            self.margin*(self.n_pc_w + 2))
+        self.width = self.cnv_width
+
+        #print(self.width, ',', int(screen_width*8/10))
+
         # La fenêtre n'est pas redimentionnable
-
         self.wnd.resizable(width=False, height=False)
-
-        # Width et height : Largeur et hauteur du canvas
-        self.width = self.pc_w*self.n_pc_w*2 + self.margin/2*(self.n_pc_w + 5)
-        self.height = self.pc_h*self.n_pc_h + self.margin*8
-
-        # Hauteur de la frame :
-        self.frameHeight = self.height/5
 
         # Positionnement de la fenêtre sur l'écran
         string = '-' + str(int(screen_width/2 - self.width/2)) + '+0'
         self.wnd.geometry(string)
 
         # Création de la zone de dessin
-        self.cnv = tk.Canvas(self.wnd, width=self.width,
-                             height=self.height, bg='white', bd=0,
+        self.cnv = tk.Canvas(self.wnd, width=self.cnv_width,
+                             height=self.cnv_height, bg='white', bd=0,
                              highlightthickness=0, relief='ridge')
         self.cnv.pack(side=tk.TOP)
 
@@ -89,21 +105,21 @@ class Application():
                      for j in range(0, self.n_pc_h*self.n_pc_w, self.n_pc_w)]
 
         # Création de la zone de commande du jeu
-        self.frm = tk.Frame(self.wnd, height=self.frameHeight,
-                            width=self.width, bg='green')
+        self.frm = tk.Frame(self.wnd, height=self.frame_height,
+                            width=self.cnv_width, bg='green')
         self.frm.pack_propagate(0)
         self.frm.pack(side=tk.BOTTOM, expand=True)
 
         '''# Création de la fenêtre de réussite et de ses éléments
-        self.frmr = tk.Frame(self.wnd, height=(self.frameHeight)/2,
+        self.frmr = tk.Frame(self.wnd, height=(self.frame_height)/2,
             width=(self.width)/2, bg='white')
         self.total_attempt = tk.Label(self.frmr, text='Déplacements totaux: ',
             width=10)'''
 
         # Création de la zone de score
 
-        self.top_frame = tk.Frame(self.cnv, height=self.margin,
-            width=self.width, bg='green')
+        self.top_frame = tk.Frame(self.cnv, height=self.top_frame_height,
+            width=self.cnv_width, bg='green')
         self.top_frame.pack_propagate(0)
         self.top_frame.place(x=0, y=0, anchor=tk.NW)
 
@@ -113,10 +129,6 @@ class Application():
             command=self.start_pause_game)
         self.start_button.pack(side=tk.TOP, pady=5, padx=5)
         tk.Button(self.frm, text='Quitter', command=self.stop_game).pack()
-        self.score_button = tk.Label(self.top_frame, text='VOTRE SCORE: ',
-            width=14, bg='green', fg='white',
-            font=('Franklin Gothic Demi Cond', 12))
-        self.score_button.pack(side=tk.LEFT, pady=5, padx=5)
         self.submit_button = tk.Button(self.frm, text='Soumettre',
                                        command=self.submit)
         self.submit_button.pack_forget()
@@ -132,6 +144,9 @@ class Application():
 
         # Création des Labels d'information
 
+        tk.Label(self.top_frame, text='VOTRE SCORE: ',
+            width=14, bg='green', fg='white',
+            font=('Franklin Gothic Demi Cond', 12)).pack(side=tk.LEFT, pady=5, padx=5)
         self.attempt_label = tk.Label(self.top_frame, text='Déplacement : 0',
             width=17, bg='green', fg='white',
             font=('Franklin Gothic Demi Cond', 12))
@@ -180,7 +195,9 @@ class Application():
         # Etape 1: Création du plateau de jeu
         for i in range(self.n_pc_h):
             for j in range(self.n_pc_w):
-                x, y = i*self.pc_w + self.margin, j*self.pc_h + self.margin*3
+                x, y = i*self.pc_w + self.margin, j*self.pc_h + \
+                    (self.cnv_height - self.top_frame_height -
+                     self.n_pc_h*self.pc_h - 2*self.margin)/2 + self.top_frame_height
                 self.cnv.create_rectangle(x, y, x + self.pc_w, y + self.pc_h)
                 # Sauvegarde chaque emplacement dessiné
                 self.authorized_pos.append(PlaceCanvas(x, y, None))
@@ -190,8 +207,8 @@ class Application():
             for j in range(self.n_pc_w):
                 # Affichage des images découpés
                 xi = self.pc_w*(self.n_pc_w) + self.margin*2 + \
-                    i*(self.pc_w + self.margin/2)
-                yi = j*(self.pc_h + self.margin/2) + self.margin*2
+                    i*(self.pc_w + self.margin)
+                yi = j*(self.pc_h + self.margin) + self.margin + self.top_frame_height
                 tag = "Object" + str(id_p)
                 self.cnv.create_image(xi + self.pc_w/2, yi + self.pc_h/2,
                     image=mat_tiles[i][j][0], tag=tag)
@@ -220,16 +237,16 @@ class Application():
 
         xy = list()
         i = 0
-        while x < self.width:
+        while x < self.cnv_width:
             x = i * x_increment
             xy.append(x)
             y = int(math.sin(i * x_factor) * y_amplitude)
-            xy.append(-y + self.height - y_amplitude)
+            xy.append(-y + self.cnv_height - y_amplitude)
             i += 1
-        xy.append(self.width)
-        xy.append(self.height)
+        xy.append(self.cnv_width)
+        xy.append(self.cnv_height)
         xy.append(0)
-        xy.append(self.height)
+        xy.append(self.cnv_height)
         self.cnv.create_polygon(xy, fill='green')
 
         #Rules(self.wnd, 200, 500)
@@ -266,6 +283,7 @@ class Application():
         # On vérifie emplacement par emplacement si ce dernier est
         # occupé par la bonne pièce
         for k in range(self.n_pc_w * self.n_pc_h):
+            print(k, ',', self.authorized_pos[k].ob.number)
             if k != self.authorized_pos[k].ob.number:
                 self.victory = False
                 # En cas de pièce au mauvaise endroit, on affiche
@@ -575,7 +593,7 @@ class Application():
     def change_image(self):
         '''Oui'''
         self.wnd.destroy()
-        main.Welcome("images")
+        #main.Welcome("images")
 
 
 class ObjectCanvas():

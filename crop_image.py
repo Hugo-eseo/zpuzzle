@@ -63,7 +63,7 @@ class ImagePuzzle():
             #resize ne modifie pas l'image si pieceWidth et pieceHeigt
             #sont déjà la vraie longueur et la vraie hauteur d'une pièce
             tile_tk.append(ImageTk.PhotoImage(i.resize((int(piece_width), int(piece_height)))))
-        random.shuffle(tile_tk) #mélange de l'ordre des pièces
+        #random.shuffle(tile_tk) #mélange de l'ordre des pièces
         return tile_tk
     
 def image_choice(folder):
