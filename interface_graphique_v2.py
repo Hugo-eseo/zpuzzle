@@ -6,19 +6,14 @@ Created on Thu Jan 21 14:23:08 2021
 """
 
 import tkinter as tk
-
 import random
 import math
 from tkinter.messagebox import askyesno
-
-import crop_image
 
 
 class Application():
     '''Contients des objets correspondant à une fenêtre de jeu'''
 
-    # Hauteur de la zone de commande
-    frameHight = 200
     # Utilisée pour connaître l'issue du jeu
     victory = False
     # Utilisée pour connaître le type de clic
@@ -28,30 +23,63 @@ class Application():
     # Utilisée pour le callback de la machie à état
     chrono_stop = True
 
-    def __init__(self, margin, pc_w, pc_h, n_pc_w, n_pc_h, image):
+    def __init__(self, n_pc_w, n_pc_h, image, ratio):
         '''Crée une fenêtre tkinter. Prend en paramètres :
-            margin : marge autour du puzzle
-            pc_w : largueur de la pièce
-            pc_h : hauteur de la pièce
             n_pc_w : nombre de pièces en largeur
             n_pc_h : nombre de pièces en hauteur
-            image : image type ImagePuzzle (géré par le fichier crop_image)'''
+            image : image type ImagePuzzle (géré par le fichier crop_image)
+            ratio : rapport entre la largeur et la hauteur de l'image'''
 
         # Mémorisation des paramètres
-        self.margin, self.pc_w, self.pc_h = margin, pc_w, pc_h
-        self.n_pc_w, self.n_pc_h = n_pc_w, n_pc_h
-
-        # Width et height : Largeur et hauteur du canvas
-        self.width = self.pc_w*self.n_pc_w*2 + self.margin/2*(self.n_pc_w + 5)
-        self.height = self.pc_h*self.n_pc_h + self.margin*4 + 150  # TEMPORAIRE
+        self.n_pc_w, self.n_pc_h, self.ratio = n_pc_w, n_pc_h, ratio
+        self.image = image
 
         # Création de la fenêtre
         self.wnd = tk.Tk()
         self.wnd.title("ZPuzzle")
 
+        # On adpate la taille de la fenêtre à la résolution de l'écran
+        # de l'utilisateur
+
+        screen_height = self.wnd.winfo_screenheight()
+        screen_width = self.wnd.winfo_screenwidth()
+
+        # La hauteur du canvas est égale à 5/10 de la hauteur de l'écran
+        self.cnv_height = int((5/10) * screen_height)
+
+        # La hauteur de la frame de commande prend la valeur 3/10 de la hauteur
+        # du canvas, celle des scores 2/20
+        self.frame_height = int((3/10) * self.cnv_height)
+        self.top_frame_height = int((2/20) * self.cnv_height)
+
+        # La hauteur totale de la fenêtre est donc
+        self.height = self.cnv_height + self.frame_height
+
+        # On calcul la hauteur d'une pièce
+        self.pc_h = int((self.cnv_height - self.top_frame_height)/
+            (self.n_pc_h + (1/4)*(self.n_pc_h + 3)))
+
+        # La marge est égale à 1/4 de la hauteur d'une pièce
+        self.margin = self.pc_h/4
+
+        # On calcule la largeur d'une pièce avec le ratio de l'image
+        self.pc_w = int(self.pc_h*self.ratio)
+
+        # On en déduit la largeur du canvas et de la fenêtre
+        self.cnv_width = int(2*self.pc_w*self.n_pc_w +
+            self.margin*(self.n_pc_w + 2))
+        self.width = self.cnv_width
+
+        # La fenêtre n'est pas redimentionnable
+        self.wnd.resizable(width=False, height=False)
+
+        # Positionnement de la fenêtre sur l'écran
+        string = '-' + str(int(screen_width/2 - self.width/2)) + '+0'
+        self.wnd.geometry(string)
+
         # Création de la zone de dessin
-        self.cnv = tk.Canvas(self.wnd, width=self.width,
-                             height=self.height, bg='white', bd=0,
+        self.cnv = tk.Canvas(self.wnd, width=self.cnv_width,
+                             height=self.cnv_height, bg='white', bd=0,
                              highlightthickness=0, relief='ridge')
         self.cnv.pack(side=tk.TOP)
 
@@ -59,7 +87,7 @@ class Application():
 
         # Récupération de la liste des tuiles de l'image
         tiles = image.crop(self.n_pc_w * self.n_pc_h)
-        list_tiles = image.createTilesTk(tiles, self.pc_w, self.pc_h)
+        list_tiles = image.create_tiles_tk(tiles, self.pc_w, self.pc_h)
 
         # Ajout d'un indice pour la vérification
         self.list_tiles_i = [[list_tiles[i], i]
@@ -74,55 +102,80 @@ class Application():
                      for j in range(0, self.n_pc_h*self.n_pc_w, self.n_pc_w)]
 
         # Création de la zone de commande du jeu
-        self.frm = tk.Frame(self.wnd, height=self.frameHight,
-                            width=self.width, bg='green')
+        self.frm = tk.Frame(self.wnd, height=self.frame_height,
+                            width=self.cnv_width, bg='green')
         self.frm.pack_propagate(0)
         self.frm.pack(side=tk.BOTTOM, expand=True)
 
+        self.sub_frm = tk.Frame(self.frm, bg='green')
+        self.sub_frm.pack(side=tk.TOP, pady=self.margin)
         '''# Création de la fenêtre de réussite et de ses éléments
-        self.frmr = tk.Frame(self.wnd, height=(self.frameHight)/2,
+        self.frmr = tk.Frame(self.wnd, height=(self.frame_height)/2,
             width=(self.width)/2, bg='white')
         self.total_attempt = tk.Label(self.frmr, text='Déplacements totaux: ',
             width=10)'''
 
-        # TEST
+        # Création de la zone de score
 
-        self.top_frame = tk.Frame(self.cnv, height=self.margin,
-                                  width=self.width, bg='green')
+        self.top_frame = tk.Frame(self.cnv, height=self.top_frame_height,
+            width=self.cnv_width, bg='green')
+
         self.top_frame.pack_propagate(0)
         self.top_frame.place(x=0, y=0, anchor=tk.NW)
 
         # Création des boutons
 
-        self.start = tk.Button(self.frm, text='Start', command=self.start_game)
-        self.start.pack(side=tk.TOP, pady=5, padx=5)
-        tk.Button(self.frm, text='Quitter', command=self.stop_game).pack()
-        self.sc = tk.Label(self.top_frame, text='VOTRE SCORE: ', width=14,
-                           bg='green', fg='white',
-                           font=('Franklin Gothic Demi Cond', 12))
-        self.sc.pack(side=tk.LEFT, pady=5, padx=5)
-        self.attempt = tk.Label(self.top_frame, text='Déplacements : 0',
-                                width=17, bg='green', fg='white',
-                                font=('Franklin Gothic Demi Cond', 12))
-        self.attempt.pack(side=tk.LEFT, pady=5, padx=5)
-        self.chrono = tk.Label(self.top_frame, text='Temps écoulé : 0s',
+        self.start_button = tk.Button(self.sub_frm, text='Start', bg='white',
+            font=('Franklin Gothic Demi Cond', 10), bd=5, overrelief='raised',
+            relief='flat', command=self.start_pause_game)
+        self.start_button.grid(column=0, row=1, sticky='n', pady=5)
+        tk.Button(self.sub_frm, text='Quitter', bg='white',
+            font=('Franklin Gothic Demi Cond', 10), bd=5, overrelief='raised',
+            relief='flat', command=self.stop_game)\
+            .grid(column=1, row=1, sticky='n', pady=5)
+        self.submit_button = tk.Button(self.sub_frm, text='Soumettre',
+            bg='white', font=('Franklin Gothic Demi Cond', 10), bd=5,
+            overrelief='raised', relief='flat', command=self.submit)
+        self.submit_button.grid_forget()
+
+        tk.Button(self.sub_frm, text='Niveau 1', bg='white',
+            font=('Franklin Gothic Demi Cond', 10), bd=5, overrelief='raised',
+            relief='flat', command=self.first_level)\
+            .grid(column=0, row=2, sticky='n', pady=5, padx=self.margin)
+        tk.Button(self.sub_frm, text='Niveau 2', bg='white',
+            font=('Franklin Gothic Demi Cond', 10), bd=5, overrelief='raised',
+            relief='flat', command=self.second_level)\
+            .grid(column=1, row=2, sticky='n', pady=5, padx=self.margin)
+        tk.Button(self.sub_frm, text='Niveau 3', bg='white',
+            font=('Franklin Gothic Demi Cond', 10), bd=5, overrelief='raised',
+            relief='flat', command=self.third_level)\
+            .grid(column=2, row=2, sticky='n', pady=5, padx=self.margin)
+        tk.Button(self.sub_frm, text="Changer d'image", bg='white',
+            font=('Franklin Gothic Demi Cond', 10), bd=5, overrelief='raised',
+            relief='flat', command=self.change_image)\
+            .grid(column=1, row=3, sticky='n', pady=5)
+
+        # Création des Labels d'information
+
+        tk.Label(self.top_frame, text='VOTRE SCORE: ',
+            width=14, bg='green', fg='white',
+            font=('Franklin Gothic Demi Cond', 12))\
+            .pack(side=tk.LEFT, pady=5, padx=5)
+        self.attempt_label = tk.Label(self.top_frame, text='Déplacement : 0',
+            width=17, bg='green', fg='white',
+            font=('Franklin Gothic Demi Cond', 12))
+        self.attempt_label.pack(side=tk.LEFT, pady=5, padx=5)
+        self.chrono_label = tk.Label(self.top_frame, text='Temps écoulé : 0s',
                                width=30, bg='green', fg='white',
                                font=('Franklin Gothic Demi Cond', 12))
-        self.chrono.pack(side=tk.LEFT, pady=5, padx=5)
+        self.chrono_label.pack(side=tk.LEFT, pady=5, padx=5)
 
         # Remise à zéro du chrono
-        self.sec = 55
+        self.sec = 0
         self.min = 0
         self.hour = 0
-        self.chrono_on = [False, None]
+        self.chrono_label_on = [False, None]
         self.move = 0
-
-        # Winframe(self.wnd, self.sec, self.nb_coup) #TEMPORAIRE
-
-        # TEMPORAIRE
-        self.submit_button = tk.Button(self.frm, text='Soumettre',
-                                       command=self.submit)
-        self.submit_button.pack_forget()
 
         '''Pour fonctionner, le jeu utilise 3 classes suplémentaires:
 
@@ -154,7 +207,10 @@ class Application():
         # Etape 1: Création du plateau de jeu
         for i in range(self.n_pc_h):
             for j in range(self.n_pc_w):
-                x, y = i*self.pc_w + self.margin, j*self.pc_h + self.margin*3
+                x, y = i*self.pc_w + self.margin, j*self.pc_h +\
+                    (self.cnv_height - self.top_frame_height -
+                     self.n_pc_h*self.pc_h - 2*self.margin)/2 +\
+                     self.top_frame_height
                 self.cnv.create_rectangle(x, y, x + self.pc_w, y + self.pc_h)
                 # Sauvegarde chaque emplacement dessiné
                 self.authorized_pos.append(PlaceCanvas(x, y, None))
@@ -164,8 +220,9 @@ class Application():
             for j in range(self.n_pc_w):
                 # Affichage des images découpés
                 xi = self.pc_w*(self.n_pc_w) + self.margin*2 + \
-                    i*(self.pc_w + self.margin/2)
-                yi = j*(self.pc_h + self.margin/2) + self.margin*2
+                    i*(self.pc_w + self.margin)
+                yi = j*(self.pc_h + self.margin) + self.margin +\
+                    self.top_frame_height
                 tag = "Object" + str(id_p)
                 self.cnv.create_image(xi + self.pc_w/2, yi + self.pc_h/2,
                                       image=mat_tiles[i][j][0], tag=tag)
@@ -186,7 +243,7 @@ class Application():
         # Largeur du sinus
         x_factor = x_increment / 150
         # Amplitude du sinus
-        y_amplitude = 40
+        y_amplitude = self.margin
 
         '''Calcule tous les "x_increment" (pas) la valeur du sinus
         la place dans un tableau de valeur avec l'abscisse, puis crée un
@@ -194,20 +251,20 @@ class Application():
 
         xy = list()
         i = 0
-        while x < self.width:
+        while x < self.cnv_width:
             x = i * x_increment
             xy.append(x)
             y = int(math.sin(i * x_factor) * y_amplitude)
-            xy.append(-y + self.height - y_amplitude)
+            xy.append(-y + self.cnv_height - y_amplitude)
             i += 1
-        xy.append(self.width)
-        xy.append(self.height)
+        xy.append(self.cnv_width)
+        xy.append(self.cnv_height)
         xy.append(0)
-        xy.append(self.height)
+        xy.append(self.cnv_height)
         self.cnv.create_polygon(xy, fill='green')
 
-        Rules(self.wnd, 200, 500)
-        Winframe(self.wnd, self.sec, self.move)
+        #Rules(self.wnd, 200, 500)
+
         self.wnd.protocol("WM_DELETE_WINDOW", self.stop_game)
         self.wnd.mainloop()
 
@@ -235,6 +292,8 @@ class Application():
         '''Verification du puzzle lorsque l'utilisateur appuis sur le bouton
         soumettre'''
         self.victory = True
+        self.start_button.grid_forget()
+        self.chrono_label_on[0] = False
         wrong_pos_object = list()
         # On vérifie emplacement par emplacement si ce dernier est
         # occupé par la bonne pièce
@@ -263,7 +322,11 @@ class Application():
             self.cnv.unbind('<ButtonRelease-1>')
         else:
             # Sinon c'est la victoire !
-            print("Won !")
+            self.chrono_label_on[0] = False
+            Winframe(self.wnd, self.sec, self.move)
+            self.cnv.unbind('<Button-1>')
+            self.cnv.unbind('<B1-Motion>')
+            self.cnv.unbind('<ButtonRelease-1>')
 
     def return_wrong_pos_object(self, wrong_pos_object):
         '''Retourne les pièces étant à la mauvaise position à un emplacement
@@ -273,34 +336,45 @@ class Application():
             self.cnv.delete(wrong_pos_object[i][1])
         # On enlève le bouton retirer
         self.submit_button.config(text="Soumettre", command=self.submit)
-        self.submit_button.pack_forget()
+        self.submit_button.grid_forget()
         # On réactive les clics :
+        self.chrono_label_on[0] = True
+        self.timer()
+        self.start_button.grid(column=0, row=1, sticky='n', pady=5)
         self.cnv.bind('<Button-1>', self.clic)
         self.cnv.bind('<B1-Motion>', self.drag_clic)
         self.cnv.bind('<ButtonRelease-1>', self.release_clic)
 
-    def start_game(self):
-        '''Lance la partie !'''
-        # Bind des touches de la souris
-        self.cnv.bind('<Button-1>', self.clic)
-        self.cnv.bind('<B1-Motion>', self.drag_clic)
-        self.cnv.bind('<ButtonRelease-1>', self.release_clic)
-        # Lance le timer
-        self.chrono_on[0] = True
-        self.timer()
-        self.start.destroy()
+    def start_pause_game(self):
+        '''Lance la partie ou met en pause la partie'''
+        if self.chrono_label_on[0]:
+            # On désactive les clics
+            self.cnv.unbind('<Button-1>')
+            self.cnv.unbind('<B1-Motion>')
+            self.cnv.unbind('<ButtonRelease-1>')
+            self.chrono_label_on[0] = False
+            self.start_button.config(text="Play")
+        else:
+            # Bind des touches de la souris
+            self.cnv.bind('<Button-1>', self.clic)
+            self.cnv.bind('<B1-Motion>', self.drag_clic)
+            self.cnv.bind('<ButtonRelease-1>', self.release_clic)
+            # Lance le timer
+            self.chrono_label_on[0] = True
+            self.timer()
+            self.start_button.config(text="Pause")
 
     def stop_game(self):
         '''Stop la partie'''
-        self.chrono_on[0] = False
-        if self.chrono_on[1] is not None:
-            self.wnd.after_cancel(self.chrono_on[1])
+        self.chrono_label_on[0] = False
+        if self.chrono_label_on[1] is not None:
+            self.wnd.after_cancel(self.chrono_label_on[1])
         self.wnd.destroy()
 
     def timer(self):
         ''' Méthode permettant le suivi du temps écoulé après le lancement
-            du jeu '''
-        if self.chrono_on[0]:
+        du jeu '''
+        if self.chrono_label_on[0]:
             if self.min == 59 and self.sec == 59:
                 self.hour += 1
                 self.min = 0
@@ -324,7 +398,7 @@ class Application():
         '''Méthode affichant le score du joueur'''
         self.move += 1
         string = 'Déplacements: ' + str(self.move)
-        self.attempt.config(text=string)
+        self.attempt_label.config(text=string)
 
     '''
     Pour la machine à état, il existe deux modes de déplacement :
@@ -358,7 +432,7 @@ class Application():
                 # un double clic rapide sur le même objet, de deux clic
                 # espacés dans le temps sur le même objet.
                 self.status = 2
-                self.chrono_stop = False
+                self.chrono_label_stop = False
                 self.cnv.after(200, self.stop_chrono)
             # Si l'évènement est un "drag_clic"
             else:
@@ -384,7 +458,7 @@ class Application():
             elif result.ob == self.object.object:
                 # Si le chrono ne s'est pas arrêté,
                 # on retourne l'objet dans la pioche
-                if not self.chrono_stop:
+                if not self.chrono_label_stop:
                     self.send_back_object_to_deck(self.object)
                 # Sinon, on attend de nouveau un clic, retour à Status = 1
                 else:
@@ -489,7 +563,7 @@ class Application():
 
     def stop_chrono(self):
         '''Arrête le chrono de la machine à état'''
-        self.chrono_stop = True
+        self.chrono_label_stop = True
 
     def active_selection_on_object(self, object_select, place):
         '''Active la sélection sur l'objet passé en argument.
@@ -528,7 +602,27 @@ class Application():
             if self.authorized_pos[k].ob is None:
                 self.submit_button.pack_forget()
                 return
-        self.submit_button.pack()
+        self.submit_button.grid(column=2, row=1, sticky='n', pady=5)
+
+    def first_level(self):
+        '''Oui'''
+        self.wnd.destroy()
+        Application(5, 5, self.image, self.ratio)
+
+    def second_level(self):
+        '''Oui'''
+        self.wnd.destroy()
+        Application(6, 6, self.image, self.ratio)
+
+    def third_level(self):
+        '''Oui'''
+        self.wnd.destroy()
+        Application(7, 7, self.image, self.ratio)
+
+    def change_image(self):
+        '''Oui'''
+        self.wnd.destroy()
+        #main.Welcome("images")
 
 
 class ObjectCanvas():
@@ -629,8 +723,9 @@ class Rules(tk.Toplevel):
         # Configuration de la fenêtre
         self.title("Règles du jeu")
         self.config(bg='white')
+        self.resizable(width=False, height=False)
         # Positionnement au centre de l'écran et en premier plan
-        self.geometry("-500+275")
+        #self.geometry("-500+275")
         self.wm_attributes("-topmost", 1)
         # Création des bandeaux de décoration
         frm = tk.Frame(self, height=25, width=frame_width, bg='green')
@@ -673,6 +768,5 @@ class Rules(tk.Toplevel):
             "Bon courage ! \n "
         tk.Label(self, text=txt, bg='white').pack()
 
-
-image = crop_image.ImagePuzzle("images\img_forest.jpg")
-boite = Application(50, 75, 75, 5, 5, image)
+'''image = crop_image.ImagePuzzle("images\img_forest.jpg")
+boite = Application(5, 5, image)'''
