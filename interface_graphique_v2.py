@@ -168,7 +168,7 @@ class Application():
     def change_image(self):
         '''Oui'''
         self.wnd.destroy()
-        #main.Welcome("images")
+        main.Welcome("images")
 
 
     '''
