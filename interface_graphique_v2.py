@@ -17,8 +17,6 @@ import crop_image
 class Application():
     '''Contients des objets correspondant à une fenêtre de jeu'''
 
-    # Hauteur de la zone de commande
-    frameHeight = 200
     # Utilisée pour connaître l'issue du jeu
     victory = False
     # Utilisée pour connaître le type de clic
@@ -28,37 +26,43 @@ class Application():
     # Utilisée pour le callback de la machie à état
     chrono_stop = True
 
-    def __init__(self, margin, pc_w, pc_h, n_pc_w, n_pc_h, image):
+    def __init__(self, n_pc_w, n_pc_h, image):
         '''Crée une fenêtre tkinter. Prend en paramètres :
-            margin : marge autour du puzzle
-            pc_w : largueur de la pièce
-            pc_h : hauteur de la pièce
             n_pc_w : nombre de pièces en largeur
             n_pc_h : nombre de pièces en hauteur
             image : image type ImagePuzzle (géré par le fichier crop_image)'''
 
         # Mémorisation des paramètres
-        self.margin, self.pc_w, self.pc_h = margin, pc_w, pc_h
         self.n_pc_w, self.n_pc_h = n_pc_w, n_pc_h
-        
+
         # Création de la fenêtre
         self.wnd = tk.Tk()
         self.wnd.title("ZPuzzle")
-        print(self.wnd.winfo_screenheight())
-        print(self.wnd.winfo_screenwidth())
-    
-        self.pc_h = int(self.wnd.winfo_screenheight()/10)
+
+        # On adpate la taille de la fenêtre à la résolution de l'écran
+        # de l'utilisateur
+
+        screen_height = self.wnd.winfo_screenheight()
+        screen_width = self.wnd.winfo_screenwidth()
+
+        self.pc_h = int(screen_height/10)
         self.pc_w = self.pc_h
-        
-        '''string = str(int(self.width)) + 'x' + \
-            str(int(self.height + self.frameHeight))
-        print(string)
-        self.wnd.geometry(string)'''
+        self.margin = self.pc_h/4
+
+        # La fenêtre n'est pas redimentionnable
+
         self.wnd.resizable(width=False, height=False)
 
         # Width et height : Largeur et hauteur du canvas
         self.width = self.pc_w*self.n_pc_w*2 + self.margin/2*(self.n_pc_w + 5)
-        self.height = self.pc_h*self.n_pc_h + self.margin*4 + 150  # TEMPORAIRE
+        self.height = self.pc_h*self.n_pc_h + self.margin*8
+
+        # Hauteur de la frame :
+        self.frameHeight = self.height/5
+
+        # Positionnement de la fenêtre sur l'écran
+        string = '-' + str(int(screen_width/2 - self.width/2)) + '+0'
+        self.wnd.geometry(string)
 
         # Création de la zone de dessin
         self.cnv = tk.Canvas(self.wnd, width=self.width,
@@ -197,7 +201,7 @@ class Application():
         # Largeur du sinus
         x_factor = x_increment / 150
         # Amplitude du sinus
-        y_amplitude = 40
+        y_amplitude = self.margin
 
         '''Calcule tous les "x_increment" (pas) la valeur du sinus
         la place dans un tableau de valeur avec l'abscisse, puis crée un
@@ -217,7 +221,7 @@ class Application():
         xy.append(self.height)
         self.cnv.create_polygon(xy, fill='green')
 
-        Rules(self.wnd, 200, 500)
+        #Rules(self.wnd, 200, 500)
         self.wnd.protocol("WM_DELETE_WINDOW", self.stop_game)
         self.wnd.mainloop()
 
@@ -668,4 +672,4 @@ class Rules(tk.Toplevel):
 
 
 image = crop_image.ImagePuzzle("images\img_forest.jpg")
-boite = Application(50, 100, 100, 5, 5, image)
+boite = Application(5, 5, image)
