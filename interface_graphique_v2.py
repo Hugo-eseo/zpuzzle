@@ -87,8 +87,8 @@ class Application():
 
         # TEST
 
-        self.top_frame = tk.Frame(self.cnv, height=self.margin, 
-            width=self.width, bg='green')
+        self.top_frame = tk.Frame(self.cnv, height=self.margin,
+                                  width=self.width, bg='green')
         self.top_frame.pack_propagate(0)
         self.top_frame.place(x=0, y=0, anchor=tk.NW)
 
@@ -98,23 +98,25 @@ class Application():
         self.start.pack(side=tk.TOP, pady=5, padx=5)
         tk.Button(self.frm, text='Quitter', command=self.stop_game).pack()
         self.sc = tk.Label(self.top_frame, text='VOTRE SCORE: ', width=14,
-            bg='green', fg='white', font=('Franklin Gothic Demi Cond',12))
+                           bg='green', fg='white',
+                           font=('Franklin Gothic Demi Cond', 12))
         self.sc.pack(side=tk.LEFT, pady=5, padx=5)
-        self.attempt = tk.Label(self.top_frame, text='Déplacement : 0', 
-            width=17, bg='green', fg='white',
-            font=('Franklin Gothic Demi Cond',12))
+        self.attempt = tk.Label(self.top_frame, text='Déplacement : 0',
+                                width=17, bg='green', fg='white',
+                                font=('Franklin Gothic Demi Cond', 12))
         self.attempt.pack(side=tk.LEFT, pady=5, padx=5)
-        self.chrono = tk.Label(self.top_frame, text='Temps écoulé : 0s', 
-            width=20, bg='green', fg='white',
-            font=('Franklin Gothic Demi Cond',12))
+        self.chrono = tk.Label(self.top_frame, text='Temps écoulé : 0s',
+                               width=20, bg='green', fg='white',
+                               font=('Franklin Gothic Demi Cond', 12))
         self.chrono.pack(side=tk.LEFT, pady=5, padx=5)
 
         # Remise à zéro du chrono
         self.sec = 0
+        self.min = 0
         self.chrono_on = [False, None]
         self.move = 0
 
-        #Winframe(self.wnd, self.sec, self.nb_coup) #TEMPORAIRE
+        # Winframe(self.wnd, self.sec, self.nb_coup) #TEMPORAIRE
 
         # TEMPORAIRE
         self.submit_button = tk.Button(self.frm, text='Soumettre',
@@ -165,13 +167,13 @@ class Application():
                 yi = j*(self.pc_h + self.margin/2) + self.margin*2
                 tag = "Object" + str(id_p)
                 self.cnv.create_image(xi + self.pc_w/2, yi + self.pc_h/2,
-                    image=mat_tiles[i][j][0], tag=tag)
+                                      image=mat_tiles[i][j][0], tag=tag)
                 # Sauvegarde chaque objet crée
                 self.object_list.append(ObjectCanvas(xi, yi, tag,
-                    mat_tiles[i][j][1]))
+                                                     mat_tiles[i][j][1]))
                 # Sauvegarde l'emplacement correspondant
                 self.authorized_pos.append(PlaceCanvas(xi, yi,
-                    self.object_list[-1]))
+                                                       self.object_list[-1]))
                 id_p += 1
 
         # Création des éléments de dessin graphiques :
@@ -240,17 +242,19 @@ class Application():
                 # En cas de pièce au mauvaise endroit, on affiche
                 # un rectangle rouge par dessus
                 x, y = self.authorized_pos[k].x, self.authorized_pos[k].y
-                rectangle = self.cnv.create_rectangle(x, y, x +
-                    self.pc_w, y + self.pc_h, outline='red', fill="red",
-                    width=2, stipple="gray50")
+                rectangle = self.cnv.create_rectangle(x, y, x + self.pc_w, y +
+                                                      self.pc_h, outline='red',
+                                                      fill="red",
+                                                      width=2,
+                                                      stipple="gray50")
                 current_object = ObjectSelect(self.authorized_pos[k].ob,
-                    self.authorized_pos[k])
+                                              self.authorized_pos[k])
                 # On mémorise la pièce et son rectangle dans une liste
                 wrong_pos_object.append([current_object, rectangle])
         if not self.victory:
             # En cas de mauvaise combinaison, le bouton Retirer s'affiche
             self.submit_button.config(text="Retirer", command=lambda:
-                self.return_wrong_pos_object(wrong_pos_object))
+                        self.return_wrong_pos_object(wrong_pos_object))
             # On désactive les clics
             self.cnv.unbind('<Button-1>')
             self.cnv.unbind('<B1-Motion>')
@@ -295,8 +299,13 @@ class Application():
         ''' Méthode permettant le suivi du temps écoulé après le lancement
         du jeu '''
         if self.chrono_on[0]:
-            self.sec += 1
-            string = 'Temps écoulé: ' + str(self.sec) + ' s'
+            if self.sec == 59:
+                self.sec = 0
+                self.min += 1
+            else:
+                self.sec += 1
+            string = 'Temps écoulé: ' + str(self.min) + ' m : ' +\
+                str(self.sec) + ' s'
             self.chrono_on[1] = self.wnd.after(1000, self.timer)
             self.chrono.config(text=string)
 
@@ -384,7 +393,7 @@ class Application():
             if self.clic_type == 2:
                 # On fait suivre l'objet
                 self.move_object(self.object, event_x - self.pc_w/2,
-                    event_y - self.pc_h/2)
+                                 event_y - self.pc_h/2)
             # Si le clic est relaché
             else:
                 # On vérifie l'emplacement
@@ -393,7 +402,7 @@ class Application():
                 if (result is None) or (result.ob is not None):
                     # On revoie l'objet à sa position initiale
                     self.move_object(self.object, self.object.init_pos.x,
-                        self.object.init_pos.y)
+                                     self.object.init_pos.y)
                     # Si l'utilisateur re-dépose l'objet sur sa case initiale
                     if result is not None and result.ob == self.object.object:
                         # On ne désactive pas la sélection
@@ -403,7 +412,7 @@ class Application():
                     elif result is not None and result.ob is not None:
                         # On échange intervertit les deux objets
                         self.swap_two_object(self.object,
-                            ObjectSelect(result.ob, result))
+                                             ObjectSelect(result.ob, result))
                     else:
                         # Sinon, on retire la sélection active
                         self.desactivate_curent_selection()
@@ -451,7 +460,7 @@ class Application():
                 # On déplace l'objet dans le premier emplacement libre de la
                 # pioche trouvé
                 self.send_object_to_final_pos(object_select,
-                    self.authorized_pos[k])
+                                              self.authorized_pos[k])
                 return
 
     def move_object(self, object_select, x, y):
@@ -477,8 +486,10 @@ class Application():
         # Passe au premier plan l'objet sélectionné
         self.cnv.tag_raise(object_select.tag)
         rectangle = self.cnv.create_rectangle(object_select.x, object_select.y,
-            object_select.x + self.pc_w, object_select.y + self.pc_h,
-            outline='green', fill="", width=5)
+                                              object_select.x + self.pc_w,
+                                              object_select.y + self.pc_h,
+                                              outline='green', fill="",
+                                              width=5)
         self.object = ObjectSelect(object_select, place, rectangle)
 
     def desactivate_curent_selection(self):
@@ -493,10 +504,10 @@ class Application():
         d'aucun emplacement valide'''
         for i in range(len(self.authorized_pos)):
             if (x >= self.authorized_pos[i].x) and \
-                (x <= self.authorized_pos[i].x + self.pc_w):
+                    (x <= self.authorized_pos[i].x + self.pc_w):
                 if (y >= self.authorized_pos[i].y) and \
-                    (y <= self.authorized_pos[i].y + self.pc_h):
-                        return self.authorized_pos[i]
+                        (y <= self.authorized_pos[i].y + self.pc_h):
+                    return self.authorized_pos[i]
         return None
 
     def check_puzzle_complete(self):
@@ -580,16 +591,17 @@ class Rules(tk.Toplevel):
         super().__init__(parent)
         self.title("Règles du jeu")
         self.config(bg='white')
-        frm = tk.Frame(self, height=40, width=frame_width, bg='green')
-        frm_bot = tk.Frame(self, height=40, width=frame_width, bg='green')
+        self.geometry("-500+275")
+        frm = tk.Frame(self, height=23, width=frame_width, bg='green')
+        frm_bot = tk.Frame(self, height=23, width=frame_width, bg='green')
         frm.pack_propagate(0)
         frm_bot.pack_propagate(0)
         frm.pack(side=tk.TOP)
         frm_bot.pack(side=tk.BOTTOM)
         txt = "Votre objectif est de compléter ce puzzle avec le moins" +\
-            "de déplacements possible et dans un minimum de temps"
-        tk.Label(self, text=txt, bg='white')
-        txt = "Pour déplacer une tuile deux choix s'offre à vous:"
+            " de \n déplacements possible et dans un minimum de temps"
+        tk.Label(self, text=txt, bg='white').pack()
+        txt = "Pour déplacer une tuile deux choix s'offrent à vous:"
         tk.Label(self, text=txt, bg='white').pack()
         txt = "-Cliquez sur la tuile et cliquer ensuite sur \n" +\
             " l'emplacement que vous voulez"
@@ -609,9 +621,13 @@ class Rules(tk.Toplevel):
         tk.Label(self, text=txt, bg='white').pack()
         txt = "Si votre puzzle est réussi, une fenêtre popup s'affichera" +\
             " indiquant votre score final.\n Vous aurez alors le choix" +\
-            " entre rejouer ou bien quitter l'application \n \n  Bon courage!"
+            " entre rejouer ou bien quitter l'application \n \n  Bon courage !"
         tk.Label(self, text=txt, bg='white').pack()
-        tk.Button(self, text='OK', command=self.destroy).pack(side=tk.BOTTOM)
+        tk.Button(frm_bot, text='OK', relief='flat',
+                  command=self.destroy).pack(side=tk.BOTTOM)
+        tk.Label(frm, text="BONJOUR ET BIENVENUE DANS ZPUZZLE !",
+                 bg='green', fg='white', font=('Franklin Gothic Demi Cond',
+                                               11)).pack()
 
 
 image = crop_image.ImagePuzzle("images\img_forest.jpg")
