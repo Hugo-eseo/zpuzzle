@@ -87,30 +87,33 @@ class Application():
 
         # TEST
 
-        self.top_frame = tk.Frame(self.cnv, height=self.margin, 
+        self.top_frame = tk.Frame(self.cnv, height=self.margin,
             width=self.width, bg='green')
         self.top_frame.pack_propagate(0)
         self.top_frame.place(x=0, y=0, anchor=tk.NW)
 
         # Création des boutons
 
-        self.start = tk.Button(self.frm, text='Start', command=self.start_game)
-        self.start.pack(side=tk.TOP, pady=5, padx=5)
+        self.start_button = tk.Button(self.frm, text='Start',
+            command=self.start_pause_game)
+        self.start_button.pack(side=tk.TOP, pady=5, padx=5)
         tk.Button(self.frm, text='Quitter', command=self.stop_game).pack()
         self.sc = tk.Label(self.top_frame, text='VOTRE SCORE: ', width=14,
-            bg='green', fg='white', font=('Franklin Gothic Demi Cond',12))
+            bg='green', fg='white', font=('Franklin Gothic Demi Cond', 12))
         self.sc.pack(side=tk.LEFT, pady=5, padx=5)
-        self.attempt = tk.Label(self.top_frame, text='Déplacement : 0', 
+        self.attempt = tk.Label(self.top_frame, text='Déplacement : 0',
             width=17, bg='green', fg='white',
-            font=('Franklin Gothic Demi Cond',12))
+            font=('Franklin Gothic Demi Cond', 12))
         self.attempt.pack(side=tk.LEFT, pady=5, padx=5)
-        self.chrono = tk.Label(self.top_frame, text='Temps écoulé : 0s', 
-            width=20, bg='green', fg='white',
-            font=('Franklin Gothic Demi Cond',12))
+        self.chrono = tk.Label(self.top_frame, text='Temps écoulé : 0s',
+                               width=30, bg='green', fg='white',
+                               font=('Franklin Gothic Demi Cond', 12))
         self.chrono.pack(side=tk.LEFT, pady=5, padx=5)
 
         # Remise à zéro du chrono
         self.sec = 0
+        self.min = 0
+        self.hour = 0
         self.chrono_on = [False, None]
         self.move = 0
 
@@ -203,6 +206,7 @@ class Application():
         xy.append(self.height)
         self.cnv.create_polygon(xy, fill='green')
 
+        Rules(self.wnd, 200, 500)
         self.wnd.protocol("WM_DELETE_WINDOW", self.stop_game)
         self.wnd.mainloop()
 
@@ -230,6 +234,8 @@ class Application():
         '''Verification du puzzle lorsque l'utilisateur appuis sur le bouton
         soumettre'''
         self.victory = True
+        self.start_button.pack_forget()
+        self.chrono_on[0] = False
         wrong_pos_object = list()
         # On vérifie emplacement par emplacement si ce dernier est
         # occupé par la bonne pièce
@@ -268,21 +274,32 @@ class Application():
         self.submit_button.config(text="Soumettre", command=self.submit)
         self.submit_button.pack_forget()
         # On réactive les clics :
+        self.chrono_on[0] = True
+        self.timer()
+        self.start_button.pack()
         self.cnv.bind('<Button-1>', self.clic)
         self.cnv.bind('<B1-Motion>', self.drag_clic)
         self.cnv.bind('<ButtonRelease-1>', self.release_clic)
 
-    def start_game(self):
-        '''Lance la partie !'''
-        # Bind des touches de la souris
-        self.cnv.bind('<Button-1>', self.clic)
-        self.cnv.bind('<B1-Motion>', self.drag_clic)
-        self.cnv.bind('<ButtonRelease-1>', self.release_clic)
-        # Lance le timer
-        self.chrono_on[0] = True
-        self.timer()
-        self.start.destroy()
-        
+    def start_pause_game(self):
+        '''Lance la partie ou met en pause la partie'''
+        if self.chrono_on[0]:
+            # On désactive les clics
+            self.cnv.unbind('<Button-1>')
+            self.cnv.unbind('<B1-Motion>')
+            self.cnv.unbind('<ButtonRelease-1>')
+            self.chrono_on[0] = False
+            self.start_button.config(text="Play")
+        else:
+            # Bind des touches de la souris
+            self.cnv.bind('<Button-1>', self.clic)
+            self.cnv.bind('<B1-Motion>', self.drag_clic)
+            self.cnv.bind('<ButtonRelease-1>', self.release_clic)
+            # Lance le timer
+            self.chrono_on[0] = True
+            self.timer()
+            self.start_button.config(text="Pause")
+
     def stop_game(self):
         '''Stop la partie'''
         self.chrono_on[0] = False
@@ -294,8 +311,17 @@ class Application():
         ''' Méthode permettant le suivi du temps écoulé après le lancement
         du jeu '''
         if self.chrono_on[0]:
-            self.sec += 1
-            string = 'Temps écoulé: ' + str(self.sec) + ' s'
+            if self.min == 59 and self.sec == 59:
+                self.hour += 1
+                self.min = 0
+                self.sec = 0
+            if self.sec == 59:
+                self.sec = 0
+                self.min += 1
+            else:
+                self.sec += 1
+            string = 'Temps écoulé: ' + str(self.hour) + ' h :' +\
+                str(self.min) + ' m : ' + str(self.sec) + ' s'
             self.chrono_on[1] = self.wnd.after(1000, self.timer)
             self.chrono.config(text=string)
 
@@ -552,55 +578,81 @@ class Winframe(tk.Toplevel):
 
     def __init__(self, parent, sec, nbcoup):
         super().__init__(parent)
+        # Configuration de la fenêtre
         self.geometry("-690+350")
+        self.wm_attributes('-topmost', 1)
         self.title("Score final")
         self.config(bg='white')
+        # Définition du score total
         self.time_total = 'Temps total: ' + str(sec)
         self.nbmove_total = 'Nombre de déplacements totaux :' + str(nbcoup)
         tk.Label(self, text=self.time_total, bg='white').pack(pady=10)
         tk.Label(self, text=self.nbmove_total, bg='white').pack(pady=10)
+        # Création des boutons pour rejouer ou quitter
         tk.Button(self, text="Recommencer", command=self.destroy).pack()
         tk.Button(self, text='Quitter', command=lambda: self.leave(parent))\
             .pack()
 
     def leave(self, wnd):
-        '''Permet de quitter le jeu à partir de la fenêtre des scores'''
+        '''Permet de quitter le jeu à partir de la fenêtre des scores à l'aide
+        d'une fenêtre popup'''
+        # Affiche la fenêtre popup au premier plan
+        wnd.wm_attributes('-topmost', 1)
         if askyesno('Vous êtes sur le point de quitter',
                     'Êtes-vous sûr de vouloir quitter ?'):
             wnd.destroy()
-        else:
-            self.destroy()
 
 
 class Rules(tk.Toplevel):
-    '''Contient les éléments qui résumment le score du joueur'''
+    '''Fenêtre affichant les règles à suivre pour jouer au jeu'''
 
     def __init__(self, parent, frame_height, frame_width):
         super().__init__(parent)
-        self.geometry("-690+350")
+        # Configuration de la fenêtre
         self.title("Règles du jeu")
-        self.frm = tk.Frame(self.wnd, height=frame_height/3,
-                            width = frame_width/3, bg='white')
-        txt ="Votre objectif est de compléter ce puzzle avec le moins ",
-        "de déplacements possible et dans un minimum de temps"
-        tk.Label(self, text=txt, width = 30).pack()
-        txt = "Pour déplacer une tuile deux choix s'offre à vous:"
-        tk.Label(self, text=txt, width = 30).pack()
-        txt = "-Cliquez sur la tuile et cliquer ensuite sur",
-        " l'emplacement que vous voulez"
-        tk.Label(self, text=txt, width = 30).pack()
-        txt = "-Maintenez le clic sur la tuile et déplacez la en la",
-        " glissant sur le plateau"
-        tk.Label(self, text=txt, width = 30).pack()
+        self.config(bg='white')
+        # Positionnement au centre de l'écran et en premier plan
+        self.geometry("-500+275")
+        self.wm_attributes("-topmost", 1)
+        # Création des bandeaux de décoration
+        frm = tk.Frame(self, height=25, width=frame_width, bg='green')
+        frm_bot = tk.Frame(self, height=25, width=frame_width, bg='green')
+        frm.pack_propagate(0)
+        frm_bot.pack_propagate(0)
+        frm.pack(side=tk.TOP)
+        frm_bot.pack(side=tk.BOTTOM)
+        tk.Label(frm, text="Bonjour et bienvenue dans ZPUZZLE !",
+                 bg='green', fg='white', font=('Franklin Gothic Demi Cond',
+                                               11)).pack()
+        tk.Button(frm_bot, text='OK', relief='flat', bg='white',
+                  command=self.destroy).pack(side=tk.BOTTOM)
+        # Définition des règles
+        txt = " \n Votre objectif est de compléter ce puzzle avec le moins" +\
+            " de \n déplacements possible et dans un minimum de temps"
+        tk.Label(self, text=txt, bg='white').pack()
+        txt = "Pour déplacer une tuile deux choix s'offrent à vous:"
+        tk.Label(self, text=txt, bg='white').pack()
+        txt = "-Cliquez sur la tuile et cliquer ensuite sur \n" +\
+            " l'emplacement que vous voulez"
+        tk.Label(self, text=txt, bg='white').pack()
+        txt = "-Maintenez le clic sur la tuile et déplacez la en \n la" +\
+            " glissant sur le plateau"
+        tk.Label(self, text=txt, bg='white').pack()
         txt = "Pour retirer une tuile, double-cliquez sur celle-ci"
-        tk.Label(self, text=txt, width = 30).pack()
-        txt = "Vous pouvez interchanger deux tuiles en glissant la",
-        " première sur la deuxième"
-        tk.Label(self, text=txt, width = 30).pack()
-        txt = "Appuyer sur le bouton soumettre lorsque vous aurez complété ",
-        " le puzzle. Vos erreurs seront indiquées en rouge et vous pourrer",
-        " alors retirer les mauvaises tuiles en appuyant sur le bouton Retirer"
-        tk.Label(self, text=txt, width = 30).pack()
+        tk.Label(self, text=txt, bg='white').pack()
+        txt = "Vous pouvez interchanger deux tuiles en glissant la \n" +\
+            " première sur la deuxième"
+        tk.Label(self, text=txt, bg='white').pack()
+        txt = "Appuyer sur le bouton soumettre lorsque vous aurez complété" +\
+            " le puzzle. Vos erreurs seront \n indiquées en rouge et vous" +\
+            " pourrez alors retirer les mauvaises tuiles \n en appuyant" +\
+            " sur le bouton Retirer"
+        tk.Label(self, text=txt, bg='white').pack()
+        txt = "Si votre puzzle est réussi, une fenêtre popup s'affichera" +\
+            " indiquant votre score final.\n Vous aurez alors le choix" +\
+            " entre rejouer ou bien quitter l'application \n \n" +\
+            "Bon courage ! \n "
+        tk.Label(self, text=txt, bg='white').pack()
 
 
 image = crop_image.ImagePuzzle("images\img_forest.jpg")
