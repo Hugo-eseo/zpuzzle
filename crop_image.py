@@ -10,8 +10,10 @@ import random
 import os
 from PIL import Image, ImageTk
 
+
 class ImagePuzzle():
     '''Prend une image en paramètre et effectue des opérations dessus'''
+
     def __init__(self, image):
         self.image = Image.open(image)
         self.size = self.image.size
@@ -21,6 +23,7 @@ class ImagePuzzle():
     def print_size(self):
         '''Affiche les dimensions de l'image sous forme (width,height)'''
         print(self.size)
+
     def crop(self, tiles_number):
         '''
         Découpage de l'image en fonction du nombre de tuiles souhaité
@@ -28,15 +31,15 @@ class ImagePuzzle():
         '''
         self.tiles_number = tiles_number
         tiles = list()
-        #calcul du nombre de découpages en longueur et en hauteur
-        #exemple : si on veut 25 tuiles, on découpe 5 fois en longueur
-        #et 5 fois en hauteur
-        #comme ça : 5*5 =25 et on a bien le nombre de tuiles souhaité
-        dim = int(math.sqrt(self.tiles_number)) #int est une sécurité
+        '''calcul du nombre de découpages en longueur et en hauteur
+        exemple : si on veut 25 tuiles, on découpe 5 fois en longueur
+        et 5 fois en hauteur
+        comme ça : 5*5 =25 et on a bien le nombre de tuiles souhaité'''
+        dim = int(math.sqrt(self.tiles_number))  # int est une sécurité
         for i in range(dim):
             for j in range(dim):
-                #calcul des coordonnées du rectangle que l'on veut découper
-                #de l'image
+                ''''calcul des coordonnées du rectangle que l'on veut découper
+                de l'image'''
                 left = i * (self.width // dim)
                 top = j * (self.height // dim)
                 right = left + self.width // dim
@@ -49,7 +52,7 @@ class ImagePuzzle():
         '''
         Création de la liste d'images de Tkinter en fonction de longueur et
         de la hauteur d'une pièce souhaitée
-        self.tiles : liste d'image non converties pour Tkinter
+        self.tiles : liste d'images non converties pour Tkinter
         pieceWidth, pieceHeight : longueur et hauteur souhaitées de chaque
         pièce
         Retourne une liste d'images utilisables dans Tkinter'
@@ -60,14 +63,14 @@ class ImagePuzzle():
 
         tile_tk = list()
         for i in self.tiles:
-            #resize ne modifie pas l'image si pieceWidth et pieceHeigt
-            #sont déjà la vraie longueur et la vraie hauteur d'une pièce
-            tile_tk.append(ImageTk.PhotoImage(i.resize((int(piece_width), int(piece_height)))))
-        random.shuffle(tile_tk) #mélange de l'ordre des pièces
+            ''''resize ne modifie pas l'image si pieceWidth et pieceHeigt
+            sont déjà la vraie longueur et la vraie hauteur d'une pièce'''
+            tile_tk.append(ImageTk.PhotoImage(i.resize((int(piece_width),
+                                                        int(piece_height)))))
+        # random.shuffle(tile_tk)  # mélange de l'ordre des pièces
         return tile_tk
-    
+
+
 def image_choice(folder):
     list_images = os.listdir(folder)
     return random.choice(list_images)
-        
-

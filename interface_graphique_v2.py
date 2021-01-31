@@ -25,7 +25,7 @@ class Application():
     # Utilisée pour le callback de la machie à état
     chrono_stop = True
 
-    def __init__(self, n_pc_w, n_pc_h, image):
+    def __init__(self, n_pc_w, n_pc_h, image, ratio):
         '''Crée une fenêtre tkinter. Prend en paramètres :
             n_pc_w : nombre de pièces en largeur
             n_pc_h : nombre de pièces en hauteur
