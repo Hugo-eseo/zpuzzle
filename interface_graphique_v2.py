@@ -10,7 +10,6 @@ import random
 import math
 from tkinter.messagebox import askyesno
 
-import crop_image
 
 class Application():
     '''Contients des objets correspondant à une fenêtre de jeu'''
@@ -47,7 +46,7 @@ class Application():
 
         # La hauteur du canvas est égale à 5/10 de la hauteur de l'écran
         self.cnv_height = int((5/10) * screen_height)
-        
+
         # La hauteur de la frame de commande prend la valeur 3/10 de la hauteur
         # du canvas, celle des scores 2/20
         self.frame_height = int((3/10) * self.cnv_height)
@@ -70,8 +69,6 @@ class Application():
         self.cnv_width = int(2*self.pc_w*self.n_pc_w +
             self.margin*(self.n_pc_w + 2))
         self.width = self.cnv_width
-
-        #print(self.width, ',', int(screen_width*8/10))
 
         # La fenêtre n'est pas redimentionnable
         self.wnd.resizable(width=False, height=False)
@@ -110,6 +107,8 @@ class Application():
         self.frm.pack_propagate(0)
         self.frm.pack(side=tk.BOTTOM, expand=True)
 
+        self.sub_frm = tk.Frame(self.frm, bg='green')
+        self.sub_frm.pack(side=tk.TOP, pady=self.margin)
         '''# Création de la fenêtre de réussite et de ses éléments
         self.frmr = tk.Frame(self.wnd, height=(self.frame_height)/2,
             width=(self.width)/2, bg='white')
@@ -125,28 +124,42 @@ class Application():
 
         # Création des boutons
 
-        self.start_button = tk.Button(self.frm, text='Start',
-            command=self.start_pause_game)
-        self.start_button.pack(side=tk.TOP, pady=5, padx=5)
-        tk.Button(self.frm, text='Quitter', command=self.stop_game).pack()
-        self.submit_button = tk.Button(self.frm, text='Soumettre',
-                                       command=self.submit)
-        self.submit_button.pack_forget()
+        self.start_button = tk.Button(self.sub_frm, text='Start', bg='white',
+            font=('Franklin Gothic Demi Cond', 10), bd=5, overrelief='raised',
+            relief='flat', command=self.start_pause_game)
+        self.start_button.grid(column=0, row=1, sticky='n', pady=5)
+        tk.Button(self.sub_frm, text='Quitter', bg='white',
+            font=('Franklin Gothic Demi Cond', 10), bd=5, overrelief='raised',
+            relief='flat', command=self.stop_game)\
+            .grid(column=1, row=1, sticky='n', pady=5)
+        self.submit_button = tk.Button(self.sub_frm, text='Soumettre',
+            bg='white', font=('Franklin Gothic Demi Cond', 10), bd=5,
+            overrelief='raised', relief='flat', command=self.submit)
+        self.submit_button.grid_forget()
 
-        tk.Button(self.frm, text = 'Niveau 1',
-             command = self.first_level).pack(side = tk.LEFT, anchor = 'nw', padx=3)
-        tk.Button(self.frm, text='Niveau 2',
-             command = self.second_level).pack(side = tk.LEFT, anchor = 'nw', padx= 3)
-        tk.Button(self.frm, text = 'Niveau 3',
-             command = self.third_level).pack(side = tk.LEFT, anchor = 'nw', padx = 3)
-        tk.Button(self.frm, text="Changer d'image",
-             command = self.change_image).pack(side=tk.LEFT, anchor='nw')
+        tk.Button(self.sub_frm, text='Niveau 1', bg='white',
+            font=('Franklin Gothic Demi Cond', 10), bd=5, overrelief='raised',
+            relief='flat', command=self.first_level)\
+            .grid(column=0, row=2, sticky='n', pady=5, padx=self.margin)
+        tk.Button(self.sub_frm, text='Niveau 2', bg='white',
+            font=('Franklin Gothic Demi Cond', 10), bd=5, overrelief='raised',
+            relief='flat', command=self.second_level)\
+            .grid(column=1, row=2, sticky='n', pady=5, padx=self.margin)
+        tk.Button(self.sub_frm, text='Niveau 3', bg='white',
+            font=('Franklin Gothic Demi Cond', 10), bd=5, overrelief='raised',
+            relief='flat', command=self.third_level)\
+            .grid(column=2, row=2, sticky='n', pady=5, padx=self.margin)
+        tk.Button(self.sub_frm, text="Changer d'image", bg='white',
+            font=('Franklin Gothic Demi Cond', 10), bd=5, overrelief='raised',
+            relief='flat', command=self.change_image)\
+            .grid(column=1, row=3, sticky='n', pady=5)
 
         # Création des Labels d'information
 
         tk.Label(self.top_frame, text='VOTRE SCORE: ',
             width=14, bg='green', fg='white',
-            font=('Franklin Gothic Demi Cond', 12)).pack(side=tk.LEFT, pady=5, padx=5)
+            font=('Franklin Gothic Demi Cond', 12))\
+            .pack(side=tk.LEFT, pady=5, padx=5)
         self.attempt_label = tk.Label(self.top_frame, text='Déplacement : 0',
             width=17, bg='green', fg='white',
             font=('Franklin Gothic Demi Cond', 12))
@@ -195,9 +208,10 @@ class Application():
         # Etape 1: Création du plateau de jeu
         for i in range(self.n_pc_h):
             for j in range(self.n_pc_w):
-                x, y = i*self.pc_w + self.margin, j*self.pc_h + \
+                x, y = i*self.pc_w + self.margin, j*self.pc_h +\
                     (self.cnv_height - self.top_frame_height -
-                     self.n_pc_h*self.pc_h - 2*self.margin)/2 + self.top_frame_height
+                     self.n_pc_h*self.pc_h - 2*self.margin)/2 +\
+                     self.top_frame_height
                 self.cnv.create_rectangle(x, y, x + self.pc_w, y + self.pc_h)
                 # Sauvegarde chaque emplacement dessiné
                 self.authorized_pos.append(PlaceCanvas(x, y, None))
@@ -208,7 +222,8 @@ class Application():
                 # Affichage des images découpés
                 xi = self.pc_w*(self.n_pc_w) + self.margin*2 + \
                     i*(self.pc_w + self.margin)
-                yi = j*(self.pc_h + self.margin) + self.margin + self.top_frame_height
+                yi = j*(self.pc_h + self.margin) + self.margin +\
+                    self.top_frame_height
                 tag = "Object" + str(id_p)
                 self.cnv.create_image(xi + self.pc_w/2, yi + self.pc_h/2,
                     image=mat_tiles[i][j][0], tag=tag)
@@ -277,7 +292,7 @@ class Application():
         '''Verification du puzzle lorsque l'utilisateur appuis sur le bouton
         soumettre'''
         self.victory = True
-        self.start_button.pack_forget()
+        self.start_button.grid_forget()
         self.chrono_label_on[0] = False
         wrong_pos_object = list()
         # On vérifie emplacement par emplacement si ce dernier est
@@ -315,11 +330,11 @@ class Application():
             self.cnv.delete(wrong_pos_object[i][1])
         # On enlève le bouton retirer
         self.submit_button.config(text="Soumettre", command=self.submit)
-        self.submit_button.pack_forget()
+        self.submit_button.grid_forget()
         # On réactive les clics :
         self.chrono_label_on[0] = True
         self.timer()
-        self.start_button.pack()
+        self.start_button.grid(column=0, row=1, sticky='n', pady=5)
         self.cnv.bind('<Button-1>', self.clic)
         self.cnv.bind('<B1-Motion>', self.drag_clic)
         self.cnv.bind('<ButtonRelease-1>', self.release_clic)
@@ -574,12 +589,13 @@ class Application():
             if self.authorized_pos[k].ob is None:
                 self.submit_button.pack_forget()
                 return
-        self.submit_button.pack()
-        
+        self.submit_button.grid(column=2, row=1, sticky='n', pady=5)
+
     def first_level(self):
         '''Oui'''
         self.wnd.destroy()
         Application(5, 5, self.image, self.ratio)
+
     def second_level(self):
         '''Oui'''
         self.wnd.destroy()
@@ -589,6 +605,7 @@ class Application():
         '''Oui'''
         self.wnd.destroy()
         Application(7, 7, self.image, self.ratio)
+
     def change_image(self):
         '''Oui'''
         self.wnd.destroy()
