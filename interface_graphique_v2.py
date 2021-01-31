@@ -326,7 +326,7 @@ class Application():
         else:
             # Sinon c'est la victoire !
             self.chrono_on[0] = False
-            Winframe(self.wnd, self.sec, self.move)
+            Winframe(self.wnd, self.sec, self.min, self.hour, self.move)
             self.cnv.unbind('<Button-1>')
             self.cnv.unbind('<B1-Motion>')
             self.cnv.unbind('<ButtonRelease-1>')
@@ -670,7 +670,7 @@ class PlaceCanvas():
 class Winframe(tk.Toplevel):
     '''Contient les éléments qui résumment le score du joueur'''
 
-    def __init__(self, parent, sec, move):
+    def __init__(self, parent, sec, m, hour, nbcoup):
         super().__init__(parent)
         # Configuration de la fenêtre
         self.geometry("-690+350")
@@ -681,8 +681,15 @@ class Winframe(tk.Toplevel):
         frm = tk.Frame(self, bg='white')
         frm.pack()
         # Définition du score total
-        self.time_total = 'Temps total: ' + str(sec)
-        self.nbmove_total = 'Nombre de déplacements totaux : ' + str(move)
+        if hour >= 1:
+            self.time_total = 'Temps total: ' + str(hour) + " h : " + str(m) +\
+                " m : " + str(sec) + " s"
+        if m >= 1:
+            self.time_total = 'Temps total: ' + str(m) + " m : " +\
+                str(sec) + " s"
+        else:
+            self.time_total = 'Temps total: ' + str(sec) + " s"
+        self.nbmove_total = 'Nombre de déplacements totaux : ' + str(nbcoup)
         tk.Label(frm, text="Félicitation ! Vous venez de terminer votre" +
                  " puzzle !", font=('Franklin Gothic Demi Cond', 12),
                  bg='green', fg='white').pack()
