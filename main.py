@@ -53,20 +53,20 @@ class SelectImage():
                                      image=self.image_tk, tag=self.tag)
 
         # Création des boutons
-        tk.Button(self.frm_right, text='Image suivante',
-                  command=self.next_image).place(x=75, y=190)
+        self.next = tk.Button(self.frm_right, text='Image suivante',
+                              command=self.next_image)
+        self.next.place(x=75, y=190)
         tk.Button(self.frm_left, text='Image précédente',
                   command=self.previous_image).place(x=75, y=190)
         tk.Button(self.frm_left, text='Retourner à la première image',
                   command=self.first_image).place(x=75, y=230)
         tk.Button(self.cnv_middle, text='Jouer avec cette image',
-                  command=self.begin_game).place(x=170, y=360)
-        self.win.mainloop()
+                  command=self.begin_game).place(x=180, y=360)
 
     def display(self):
         '''Fonction qui sert pour les trois à venir, ouvre l'image, la met à
         la taille souhaitée, la convertie pour être utilisable par Tkinter,
-        et l'affiche dans le canva central en mémorisant son tag'''
+        et l'affiche dans le canvas central en mémorisant son tag'''
         self.image = Image.open("images\\" + self.list_images[self.num_image])
         self.ratio_wh = self.image.size[0]/self.image.size[1]
         self.image = self.image.resize((int(300*self.ratio_wh), 300))
@@ -76,7 +76,7 @@ class SelectImage():
                                      image=self.image_tk, tag=self.tag)
 
     def next_image(self):
-        '''Affiche l'image suivante du dossier images
+        '''Affiche l'image suivante dans le dossier
         Si c'est la dernière image qui est affichée, la fonction ne fait rien
         '''
         if self.num_image == len(self.list_images)-1:
@@ -86,7 +86,7 @@ class SelectImage():
         self.display()
 
     def previous_image(self):
-        '''Affiche l'image précédente du dossier images
+        '''Affiche l'image précédente dans le dossier
         Si c'est la premoère image qui est affichée, la fonction ne fait rien
         '''
         if self.num_image == 0:
@@ -109,5 +109,5 @@ class SelectImage():
         ratio_wh = image.width/image.height
         interface_graphique_v2.Application(5, 5, image, ratio_wh)
 
- 
+
 SelectImage("images")
