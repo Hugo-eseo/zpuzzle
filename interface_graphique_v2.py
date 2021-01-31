@@ -580,15 +580,36 @@ class Winframe(tk.Toplevel):
         self.wm_attributes('-topmost', 1)
         self.title("Score final")
         self.config(bg='white')
+        frm = tk.Frame(self, height=200, width=400, bg='white')
+        frm.pack_propagate(0)
+        frm.pack()
+        frm_bot = tk.Frame(self, height=22, width=400, bg='green')
+        frm_bot.pack_propagate(0)
+        frm_bot.pack(side=tk.BOTTOM)
         # Définition du score total
         self.time_total = 'Temps total: ' + str(sec)
-        self.nbmove_total = 'Nombre de déplacements totaux :' + str(nbcoup)
-        tk.Label(self, text=self.time_total, bg='white').pack(pady=10)
-        tk.Label(self, text=self.nbmove_total, bg='white').pack(pady=10)
+        self.nbmove_total = 'Nombre de déplacements totaux : ' + str(nbcoup)
+        tk.Label(frm, text="Félicitation ! Vous venez de terminer votre" +
+                 " puzzle !", font=('Franklin Gothic Demi Cond', 12),
+                 bg='green', fg='white', width=100).pack()
+        tk.Label(frm, text="\n Voici votre résultat :", bg='white', fg='green',
+                 width=100).pack()
+        tk.Label(frm, text='\n' + self.time_total, bg='white', fg='green',
+                 width=100)\
+            .pack(pady=10, padx=50)
+        tk.Label(frm, text='\n' + self.nbmove_total, bg='white', fg='green',
+                 width=100)\
+            .pack(pady=10, padx=50)
         # Création des boutons pour rejouer ou quitter
-        tk.Button(self, text="Recommencer", command=self.destroy).pack()
-        tk.Button(self, text='Quitter', command=lambda: self.leave(parent))\
-            .pack()
+        tk.Button(frm_bot, text="Recommencer",
+                  font=('Franklin Gothic Demi Cond', 11), bg='white',
+                  relief='flat', overrelief='groove', command=self.destroy)\
+            .pack(side=tk.LEFT)
+        tk.Button(frm_bot, text='Quitter',
+                  font=('Franklin Gothic Demi Cond', 11), bg='white',
+                  relief='flat', overrelief='groove',
+                  command=lambda: self.leave(parent))\
+            .pack(side=tk.RIGHT)
 
     def leave(self, wnd):
         '''Permet de quitter le jeu à partir de la fenêtre des scores à l'aide
@@ -621,8 +642,9 @@ class Rules(tk.Toplevel):
         tk.Label(frm, text="Bonjour et bienvenue dans ZPUZZLE !",
                  bg='green', fg='white', font=('Franklin Gothic Demi Cond',
                                                11)).pack()
-        tk.Button(frm_bot, text='OK', relief='flat', bg='white',
-                  command=self.destroy).pack(side=tk.BOTTOM)
+        tk.Button(frm_bot, text='OK', font=('Franklin Gothic Demi Cond', 11),
+                  relief='flat', overrelief='groove',
+                  bg='white', command=self.destroy).pack(side=tk.BOTTOM)
         # Définition des règles
         txt = " \n Votre objectif est de compléter ce puzzle avec le moins" +\
             " de \n déplacements possible et dans un minimum de temps"
