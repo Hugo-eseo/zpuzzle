@@ -299,22 +299,24 @@ class Application():
 
     def timer(self):
         ''' Méthode permettant le suivi du temps écoulé après le lancement
-        du jeu '''
+            du jeu '''
         if self.chrono_on[0]:
-            if self.sec >= 0 and self.min == 0  and self.hour == 0:
-                string = "Temps écoulé: " + str(self.sec) + " s"
-            if self.min == 60 and self.sec == 60 or self.hour >= 1:
+            if self.min == 59 and self.sec == 59:
                 self.hour += 1
                 self.min = 0
                 self.sec = 0
-                string = "Temps écoulé: " + str(self.hour) + " h :" +\
-                    str(self.min) + " m :" + str(self.sec) + " s"
-            if self.sec == 60 or self.min >= 1:
+            if self.sec == 59:
                 self.sec = 0
                 self.min += 1
-                string = "Temps écoulé: " + str(self.min) + ' m :' +\
-                    str(self.sec) + ' s'
-            self.sec += 1
+            else:
+                self.sec += 1
+                string = "Temps écoulé : " + str(self.sec) + " s"
+            if self.min > 0:
+                string = "Temps écoulé :" + str(self.min) + " m : " +\
+                    str(self.sec) + " s"
+            if self.hour > 0:
+                string = "Temps écoulé : " + str(self.hour) + " h : " +\
+                    str(self.min) + " m : " + str(self.sec) + " s"
             self.chrono_on[1] = self.wnd.after(1000, self.timer)
             self.chrono.config(text=string)
 
