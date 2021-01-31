@@ -8,6 +8,9 @@ Created on Thu Jan 21 14:23:08 2021
 import tkinter as tk
 import random
 import math
+import os
+
+import crop_image
 from tkinter.messagebox import askyesno
 
 
@@ -49,7 +52,7 @@ class Application():
 
         # La hauteur de la frame de commande prend la valeur 3/10 de la hauteur
         # du canvas, celle des scores 2/20
-        self.frame_height = int((3/10) * self.cnv_height)
+        self.frame_height = int((4/10) * self.cnv_height)
         self.top_frame_height = int((2/20) * self.cnv_height)
 
         # La hauteur totale de la fenêtre est donc
@@ -79,8 +82,8 @@ class Application():
 
         # Création de la zone de dessin
         self.cnv = tk.Canvas(self.wnd, width=self.cnv_width,
-                             height=self.cnv_height, bg='white', bd=0,
-                             highlightthickness=0, relief='ridge')
+            height=self.cnv_height, bg='white', bd=0, highlightthickness=0,
+            relief='ridge')
         self.cnv.pack(side=tk.TOP)
 
         # Création des éléments servant pour la découpe de l'image
@@ -164,6 +167,9 @@ class Application():
                                width=30, bg='green', fg='white',
                                font=('Franklin Gothic Demi Cond', 12))
         self.chrono_label.pack(side=tk.LEFT, pady=5, padx=5)
+        self.fail_label = tk.Label(self.top_frame, text='', bg='green',
+            fg='red', font=('Franklin Gothic Demi Cond', 12))
+        self.fail_label.pack_forget()
 
         # Remise à zéro du chrono
         self.sec = 0
@@ -220,13 +226,13 @@ class Application():
                     self.top_frame_height
                 tag = "Object" + str(id_p)
                 self.cnv.create_image(xi + self.pc_w/2, yi + self.pc_h/2,
-                                      image=mat_tiles[i][j][0], tag=tag)
+                    image=mat_tiles[i][j][0], tag=tag)
                 # Sauvegarde chaque objet crée
                 self.object_list.append(ObjectCanvas(xi, yi, tag,
-                                                     mat_tiles[i][j][1]))
+                    mat_tiles[i][j][1]))
                 # Sauvegarde l'emplacement correspondant
                 self.authorized_pos.append(PlaceCanvas(xi, yi,
-                                                       self.object_list[-1]))
+                    self.object_list[-1]))
                 id_p += 1
 
         # Création des éléments de dessin graphiques :
@@ -290,17 +296,17 @@ class Application():
         wrong_pos_object = list()
         # On vérifie emplacement par emplacement si ce dernier est
         # occupé par la bonne pièce
+        i = 0
         for k in range(self.n_pc_w * self.n_pc_h):
             if k != self.authorized_pos[k].ob.number:
+                i += 1
                 self.victory = False
                 # En cas de pièce au mauvaise endroit, on affiche
                 # un rectangle rouge par dessus
                 x, y = self.authorized_pos[k].x, self.authorized_pos[k].y
                 rectangle = self.cnv.create_rectangle(x, y, x + self.pc_w, y +
-                                                      self.pc_h, outline='red',
-                                                      fill="red",
-                                                      width=2,
-                                                      stipple="gray50")
+                    self.pc_h, outline='red',  fill="red", width=2,
+                    stipple="gray50")
                 current_object = ObjectSelect(self.authorized_pos[k].ob,
                                               self.authorized_pos[k])
                 # On mémorise la pièce et son rectangle dans une liste
@@ -309,6 +315,10 @@ class Application():
             # En cas de mauvaise combinaison, le bouton Retirer s'affiche
             self.submit_button.config(text="Retirer", command=lambda:
                         self.return_wrong_pos_object(wrong_pos_object))
+            # On affiche le nombre de pièce mal positionnées
+            string = "Nombre d'erreur : " + str(i)
+            self.fail_label.config(text=string)
+            self.fail_label.pack(side=tk.LEFT, pady=5, padx=5)
             # On désactive les clics
             self.cnv.unbind('<Button-1>')
             self.cnv.unbind('<B1-Motion>')
@@ -330,6 +340,8 @@ class Application():
         # On enlève le bouton retirer
         self.submit_button.config(text="Soumettre", command=self.submit)
         self.submit_button.grid_forget()
+        # On enlève l'affichage du nombre d'erreur
+        self.fail_label.pack_forget()
         # On réactive les clics :
         self.chrono_on[0] = True
         self.timer()
@@ -564,10 +576,8 @@ class Application():
         # Passe au premier plan l'objet sélectionné
         self.cnv.tag_raise(object_select.tag)
         rectangle = self.cnv.create_rectangle(object_select.x, object_select.y,
-                                              object_select.x + self.pc_w,
-                                              object_select.y + self.pc_h,
-                                              outline='green', fill="",
-                                              width=5)
+            object_select.x + self.pc_w, object_select.y + self.pc_h,
+            outline='green', fill="", width=5)
         self.object = ObjectSelect(object_select, place, rectangle)
 
     def desactivate_curent_selection(self):
@@ -593,29 +603,29 @@ class Application():
         Si oui affichage du bouton soumettre'''
         for k in range(self.n_pc_w * self.n_pc_h):
             if self.authorized_pos[k].ob is None:
-                self.submit_button.pack_forget()
+                self.submit_button.grid_forget()
                 return
         self.submit_button.grid(column=2, row=1, sticky='n', pady=5)
 
     def first_level(self):
         '''Oui'''
         self.wnd.destroy()
-        Application(5, 5, self.image, self.ratio)
+        Application(2, 2, self.image, self.ratio)
 
     def second_level(self):
         '''Oui'''
         self.wnd.destroy()
-        Application(6, 6, self.image, self.ratio)
+        Application(5, 5, self.image, self.ratio)
 
     def third_level(self):
         '''Oui'''
         self.wnd.destroy()
-        Application(7, 7, self.image, self.ratio)
+        Application(6, 6, self.image, self.ratio)
 
     def change_image(self):
         '''Oui'''
         self.wnd.destroy()
-        #main.Welcome("images")
+        SelectImage("images")
 
 
 class ObjectCanvas():
@@ -705,6 +715,7 @@ class Winframe(tk.Toplevel):
     def restart(self, wnd):
         '''Permet de relancer une partie'''
         wnd.destroy()
+        SelectImage("images")
 
 
 class Rules(tk.Toplevel):
@@ -755,3 +766,102 @@ class Rules(tk.Toplevel):
             " entre rejouer ou bien quitter l'application \n \n" +\
             "Bon courage ! \n "
         tk.Label(self, text=txt, bg='white').pack()
+
+class SelectImage():
+    '''Fenêtre d'accueil permettant de choisir l'image à reconstituer'''
+
+    def __init__(self, folder):
+        # Mémorisation du fichier
+        self.folder = folder
+
+        # Création de la fenêtre Tkinter et de ses éléments (canva, frames)
+        self.win = tk.Tk()
+        self.win.title("Selection de l'image")
+        self.win.geometry("1000x400")
+        self.win.resizable(width=False, height=False)  # Pas de fullscreen
+
+        self.frm_left = tk.Frame(self.win, height=800, width=250, bg="white")
+        self.frm_left.pack(side=tk.LEFT)
+
+        self.cnv_middle = tk.Canvas(self.win, height=800, width=500,
+                                    bg="white", bd=0,
+                                    highlightthickness=0, relief='ridge')
+        self.cnv_middle.pack(side=tk.LEFT)
+
+        self.frm_right = tk.Canvas(self.win, height=800, width=250, bg="white",
+                                   bd=0, highlightthickness=0, relief="ridge")
+        self.frm_right.pack(side=tk.RIGHT)
+
+        # Création de la liste des images du fichier
+        self.list_images = os.listdir(self.folder)
+
+        # Affichage de la première image du dossier selectionné
+        self.num_image = 0
+        self.image = crop_image.Image.open("images\\" + self.list_images[0])
+        self.ratio_wh = self.image.size[0]/self.image.size[1]
+        self.image = self.image.resize((int(300*self.ratio_wh), 300))
+        self.image_tk = crop_image.ImageTk.PhotoImage(self.image)
+        self.tag = 'image' + str(self.num_image)
+
+        self.cnv_middle.create_image(1000/4, 400/2,
+                                     image=self.image_tk, tag=self.tag)
+
+        # Création des boutons
+        tk.Button(self.frm_right, text='Image suivante',
+                  command=self.next_image).place(x=75, y=190)
+        tk.Button(self.frm_left, text='Image précédente',
+                  command=self.previous_image).place(x=75, y=190)
+        tk.Button(self.frm_left, text='Retourner à la première image',
+                  command=self.first_image).place(x=75, y=230)
+        tk.Button(self.cnv_middle, text='Jouer avec cette image',
+                  command=self.begin_game).place(x=170, y=360)
+        self.win.mainloop()
+
+    def display(self):
+        '''Fonction qui sert pour les trois à venir, ouvre l'image, la met à
+        la taille souhaitée, la convertie pour être utilisable par Tkinter,
+        et l'affiche dans le canva central en mémorisant son tag'''
+        self.image = crop_image.Image.open("images\\" +
+            self.list_images[self.num_image])
+        self.ratio_wh = self.image.size[0]/self.image.size[1]
+        self.image = self.image.resize((int(300*self.ratio_wh), 300))
+        self.image_tk = crop_image.ImageTk.PhotoImage(self.image)
+        self.tag = 'image' + str(self.num_image)
+        self.cnv_middle.create_image(1000/4, 400/2,
+                                     image=self.image_tk, tag=self.tag)
+
+    def next_image(self):
+        '''Affiche l'image suivante du dossier images
+        Si c'est la dernière image qui est affichée, la fonction ne fait rien
+        '''
+        if self.num_image == len(self.list_images)-1:
+            return
+        self.cnv_middle.delete(self.tag)
+        self.num_image += 1
+        self.display()
+
+    def previous_image(self):
+        '''Affiche l'image précédente du dossier images
+        Si c'est la premoère image qui est affichée, la fonction ne fait rien
+        '''
+        if self.num_image == 0:
+            return
+        self.cnv_middle.delete(self.tag)
+        self.num_image -= 1
+        self.display()
+
+    def first_image(self):
+        '''Retourne au début de la liste d'images'''
+        self.cnv_middle.delete(self.tag)
+        self.num_image = 0
+        self.display()
+
+    def begin_game(self):
+        '''Lance le jeu avec l'image affichée à l'écran'''
+        image_chosen = self.list_images[self.num_image]
+        image = crop_image.ImagePuzzle("images\\" + str(image_chosen))
+        ratio_wh = image.width/image.height
+        result = Rules(self.win)
+        self.win.wait_window(result)
+        self.win.destroy()
+        Application(2, 2, image, ratio_wh)
