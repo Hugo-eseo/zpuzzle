@@ -40,19 +40,25 @@ class Application():
         # Mémorisation des paramètres
         self.margin, self.pc_w, self.pc_h = margin, pc_w, pc_h
         self.n_pc_w, self.n_pc_h = n_pc_w, n_pc_h
+        
+        # Création de la fenêtre
+        self.wnd = tk.Tk()
+        self.wnd.title("ZPuzzle")
+        print(self.wnd.winfo_screenheight())
+        print(self.wnd.winfo_screenwidth())
+        
+        moyenne = int((self.wnd.winfo_screenheight()+self.wnd.winfo_screenwidth())/30)
+        self.pc_w = moyenne
+        self.pc_h = moyenne
+        '''string = str(int(self.width)) + 'x' + \
+            str(int(self.height + self.frameHeight))
+        print(string)
+        self.wnd.geometry(string)'''
+        self.wnd.resizable(width=False, height=False)
 
         # Width et height : Largeur et hauteur du canvas
         self.width = self.pc_w*self.n_pc_w*2 + self.margin/2*(self.n_pc_w + 5)
         self.height = self.pc_h*self.n_pc_h + self.margin*4 + 150  # TEMPORAIRE
-
-        # Création de la fenêtre
-        self.wnd = tk.Tk()
-        self.wnd.title("ZPuzzle")
-        string = str(int(self.width)) + 'x' + \
-            str(int(self.height + self.frameHeight))
-        print(string)
-        self.wnd.geometry(string)
-        self.wnd.resizable(width=False, height=False)
 
         # Création de la zone de dessin
         self.cnv = tk.Canvas(self.wnd, width=self.width,
