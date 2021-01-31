@@ -174,7 +174,7 @@ class Application():
         self.sec = 0
         self.min = 0
         self.hour = 0
-        self.chrono_label_on = [False, None]
+        self.chrono_on = [False, None]
         self.move = 0
 
         '''Pour fonctionner, le jeu utilise 3 classes suplémentaires:
@@ -293,7 +293,7 @@ class Application():
         soumettre'''
         self.victory = True
         self.start_button.grid_forget()
-        self.chrono_label_on[0] = False
+        self.chrono_on[0] = False
         wrong_pos_object = list()
         # On vérifie emplacement par emplacement si ce dernier est
         # occupé par la bonne pièce
@@ -322,7 +322,7 @@ class Application():
             self.cnv.unbind('<ButtonRelease-1>')
         else:
             # Sinon c'est la victoire !
-            self.chrono_label_on[0] = False
+            self.chrono_on[0] = False
             Winframe(self.wnd, self.sec, self.move)
             self.cnv.unbind('<Button-1>')
             self.cnv.unbind('<B1-Motion>')
@@ -338,7 +338,7 @@ class Application():
         self.submit_button.config(text="Soumettre", command=self.submit)
         self.submit_button.grid_forget()
         # On réactive les clics :
-        self.chrono_label_on[0] = True
+        self.chrono_on[0] = True
         self.timer()
         self.start_button.grid(column=0, row=1, sticky='n', pady=5)
         self.cnv.bind('<Button-1>', self.clic)
@@ -347,12 +347,12 @@ class Application():
 
     def start_pause_game(self):
         '''Lance la partie ou met en pause la partie'''
-        if self.chrono_label_on[0]:
+        if self.chrono_on[0]:
             # On désactive les clics
             self.cnv.unbind('<Button-1>')
             self.cnv.unbind('<B1-Motion>')
             self.cnv.unbind('<ButtonRelease-1>')
-            self.chrono_label_on[0] = False
+            self.chrono_on[0] = False
             self.start_button.config(text="Play")
         else:
             # Bind des touches de la souris
@@ -360,21 +360,21 @@ class Application():
             self.cnv.bind('<B1-Motion>', self.drag_clic)
             self.cnv.bind('<ButtonRelease-1>', self.release_clic)
             # Lance le timer
-            self.chrono_label_on[0] = True
+            self.chrono_on[0] = True
             self.timer()
             self.start_button.config(text="Pause")
 
     def stop_game(self):
         '''Stop la partie'''
-        self.chrono_label_on[0] = False
-        if self.chrono_label_on[1] is not None:
-            self.wnd.after_cancel(self.chrono_label_on[1])
+        self.chrono_on[0] = False
+        if self.chrono_on[1] is not None:
+            self.wnd.after_cancel(self.chrono_on[1])
         self.wnd.destroy()
 
     def timer(self):
         ''' Méthode permettant le suivi du temps écoulé après le lancement
         du jeu '''
-        if self.chrono_label_on[0]:
+        if self.chrono_on[0]:
             if self.min == 59 and self.sec == 59:
                 self.hour += 1
                 self.min = 0
@@ -392,7 +392,7 @@ class Application():
                 string = "Temps écoulé : " + str(self.hour) + " h : " +\
                     str(self.min) + " m : " + str(self.sec) + " s"
             self.chrono_on[1] = self.wnd.after(1000, self.timer)
-            self.chrono.config(text=string)
+            self.chrono_label.config(text=string)
 
     def update_score(self):
         '''Méthode affichant le score du joueur'''
