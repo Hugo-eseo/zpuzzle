@@ -100,7 +100,7 @@ class Application():
         self.total_attempt = tk.Label(self.frmr, text='Déplacements totaux: ',
             width=10)'''
 
-        # TEST
+        # Création de la zone de score
 
         self.top_frame = tk.Frame(self.cnv, height=self.margin,
             width=self.width, bg='green')
@@ -113,31 +113,33 @@ class Application():
             command=self.start_pause_game)
         self.start_button.pack(side=tk.TOP, pady=5, padx=5)
         tk.Button(self.frm, text='Quitter', command=self.stop_game).pack()
-        self.sc = tk.Label(self.top_frame, text='VOTRE SCORE: ', width=14,
-            bg='green', fg='white', font=('Franklin Gothic Demi Cond', 12))
-        self.sc.pack(side=tk.LEFT, pady=5, padx=5)
-        self.attempt = tk.Label(self.top_frame, text='Déplacement : 0',
+        self.score_button = tk.Label(self.top_frame, text='VOTRE SCORE: ',
+            width=14, bg='green', fg='white',
+            font=('Franklin Gothic Demi Cond', 12))
+        self.score_button.pack(side=tk.LEFT, pady=5, padx=5)
+        self.submit_button = tk.Button(self.frm, text='Soumettre',
+                                       command=self.submit)
+        self.submit_button.pack_forget()
+
+        # Création des Labels d'information
+
+        self.attempt_label = tk.Label(self.top_frame, text='Déplacement : 0',
             width=17, bg='green', fg='white',
             font=('Franklin Gothic Demi Cond', 12))
-        self.attempt.pack(side=tk.LEFT, pady=5, padx=5)
-        self.chrono = tk.Label(self.top_frame, text='Temps écoulé : 0s',
+        self.attempt_label.pack(side=tk.LEFT, pady=5, padx=5)
+        self.chrono_label = tk.Label(self.top_frame, text='Temps écoulé : 0s',
                                width=30, bg='green', fg='white',
                                font=('Franklin Gothic Demi Cond', 12))
-        self.chrono.pack(side=tk.LEFT, pady=5, padx=5)
+        self.chrono_label.pack(side=tk.LEFT, pady=5, padx=5)
 
         # Remise à zéro du chrono
         self.sec = 0
         self.min = 0
         self.hour = 0
-        self.chrono_on = [False, None]
+        self.chrono_label_on = [False, None]
         self.move = 0
 
         #Winframe(self.wnd, self.sec, self.nb_coup) #TEMPORAIRE
-
-        # TEMPORAIRE
-        self.submit_button = tk.Button(self.frm, text='Soumettre',
-                                       command=self.submit)
-        self.submit_button.pack_forget()
 
         '''Pour fonctionner, le jeu utilise 3 classes suplémentaires:
 
@@ -250,7 +252,7 @@ class Application():
         soumettre'''
         self.victory = True
         self.start_button.pack_forget()
-        self.chrono_on[0] = False
+        self.chrono_label_on[0] = False
         wrong_pos_object = list()
         # On vérifie emplacement par emplacement si ce dernier est
         # occupé par la bonne pièce
@@ -289,7 +291,7 @@ class Application():
         self.submit_button.config(text="Soumettre", command=self.submit)
         self.submit_button.pack_forget()
         # On réactive les clics :
-        self.chrono_on[0] = True
+        self.chrono_label_on[0] = True
         self.timer()
         self.start_button.pack()
         self.cnv.bind('<Button-1>', self.clic)
@@ -298,12 +300,12 @@ class Application():
 
     def start_pause_game(self):
         '''Lance la partie ou met en pause la partie'''
-        if self.chrono_on[0]:
+        if self.chrono_label_on[0]:
             # On désactive les clics
             self.cnv.unbind('<Button-1>')
             self.cnv.unbind('<B1-Motion>')
             self.cnv.unbind('<ButtonRelease-1>')
-            self.chrono_on[0] = False
+            self.chrono_label_on[0] = False
             self.start_button.config(text="Play")
         else:
             # Bind des touches de la souris
@@ -311,21 +313,21 @@ class Application():
             self.cnv.bind('<B1-Motion>', self.drag_clic)
             self.cnv.bind('<ButtonRelease-1>', self.release_clic)
             # Lance le timer
-            self.chrono_on[0] = True
+            self.chrono_label_on[0] = True
             self.timer()
             self.start_button.config(text="Pause")
 
     def stop_game(self):
         '''Stop la partie'''
-        self.chrono_on[0] = False
-        if self.chrono_on[1] is not None:
-            self.wnd.after_cancel(self.chrono_on[1])
+        self.chrono_label_on[0] = False
+        if self.chrono_label_on[1] is not None:
+            self.wnd.after_cancel(self.chrono_label_on[1])
         self.wnd.destroy()
 
     def timer(self):
         ''' Méthode permettant le suivi du temps écoulé après le lancement
         du jeu '''
-        if self.chrono_on[0]:
+        if self.chrono_label_on[0]:
             if self.min == 59 and self.sec == 59:
                 self.hour += 1
                 self.min = 0
@@ -337,14 +339,14 @@ class Application():
                 self.sec += 1
             string = 'Temps écoulé: ' + str(self.hour) + ' h :' +\
                 str(self.min) + ' m : ' + str(self.sec) + ' s'
-            self.chrono_on[1] = self.wnd.after(1000, self.timer)
-            self.chrono.config(text=string)
+            self.chrono_label_on[1] = self.wnd.after(1000, self.timer)
+            self.chrono_label.config(text=string)
 
     def update_score(self):
         '''Méthode affichant le score du joueur'''
         self.move += 1
         string = 'Déplacements: ' + str(self.move)
-        self.attempt.config(text=string)
+        self.attempt_label.config(text=string)
 
     '''
     Pour la machine à état, il existe deux modes de déplacement :
@@ -378,7 +380,7 @@ class Application():
                 # un double clic rapide sur le même objet, de deux clic
                 # espacés dans le temps sur le même objet.
                 self.status = 2
-                self.chrono_stop = False
+                self.chrono_label_stop = False
                 self.cnv.after(200, self.stop_chrono)
             # Si l'évènement est un "drag_clic"
             else:
@@ -404,7 +406,7 @@ class Application():
             elif result.ob == self.object.object:
                 # Si le chrono ne s'est pas arrêté,
                 # on retourne l'objet dans la pioche
-                if not self.chrono_stop:
+                if not self.chrono_label_stop:
                     self.send_back_object_to_deck(self.object)
                 # Sinon, on attend de nouveau un clic, retour à Status = 1
                 else:
@@ -509,7 +511,7 @@ class Application():
 
     def stop_chrono(self):
         '''Arrête le chrono de la machine à état'''
-        self.chrono_stop = True
+        self.chrono_label_stop = True
 
     def active_selection_on_object(self, object_select, place):
         '''Active la sélection sur l'objet passé en argument.
