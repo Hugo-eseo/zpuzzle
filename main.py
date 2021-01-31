@@ -109,5 +109,5 @@ class SelectImage():
         ratio_wh = image.width/image.height
         interface_graphique_v2.Application(5, 5, image, ratio_wh)
 
-
+ 
 SelectImage("images")
