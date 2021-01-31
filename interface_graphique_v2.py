@@ -46,10 +46,10 @@ class Application():
         self.wnd.title("ZPuzzle")
         print(self.wnd.winfo_screenheight())
         print(self.wnd.winfo_screenwidth())
+    
+        self.pc_h = int(self.wnd.winfo_screenheight()/10)
+        self.pc_w = self.pc_h
         
-        moyenne = int((self.wnd.winfo_screenheight()+self.wnd.winfo_screenwidth())/30)
-        self.pc_w = moyenne
-        self.pc_h = moyenne
         '''string = str(int(self.width)) + 'x' + \
             str(int(self.height + self.frameHeight))
         print(string)
