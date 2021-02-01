@@ -50,10 +50,10 @@ class Application():
         # La hauteur du canvas est égale à 5/10 de la hauteur de l'écran
         self.cnv_height = int((5/10) * screen_height)
 
-        # La hauteur de la frame de commande prend la valeur 3/10 de la hauteur
+        # La hauteur de la frame de commande prend la valeur 4/10 de la hauteur
         # du canvas, celle des scores 2/20
         self.frame_height = int((4/10) * self.cnv_height)
-        self.top_frame_height = int((2/20) * self.cnv_height)
+        self.top_frame_height = int((3/20) * self.cnv_height)
 
         # La hauteur totale de la fenêtre est donc
         self.height = self.cnv_height + self.frame_height
