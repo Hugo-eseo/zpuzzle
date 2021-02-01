@@ -822,9 +822,9 @@ class SelectImage():
         tk.Button(self.frm_right, text='Image suivante',
                   command=self.next_image).place(x=75, y=190)
         tk.Button(self.frm_left, text='Image précédente',
-                  command=self.previous_image).place(x=150, y=190)
+                  command=self.previous_image).place(x=75, y=190)
         tk.Button(self.frm_left, text='Retourner à la première image',
-                  command=self.first_image).place(x=150, y=230)
+                  command=self.first_image).place(x=75, y=230)
         tk.Button(self.cnv_middle, text='Jouer avec cette image',
                   command=self.begin_game).pack(side=tk.BOTTOM, pady=10)
         self.win.mainloop()
