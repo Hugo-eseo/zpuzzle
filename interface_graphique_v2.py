@@ -752,7 +752,7 @@ class Rules(tk.Toplevel):
         tk.Label(self, text=txt, bg='white').pack()
         txt = "Pour déplacer une tuile deux choix s'offrent à vous:"
         tk.Label(self, text=txt, bg='white').pack()
-        txt = "-Cliquez sur la tuile et cliquer ensuite sur \n" +\
+        txt = "-Cliquez sur la tuile et cliquez ensuite sur \n" +\
             " l'emplacement que vous voulez"
         tk.Label(self, text=txt, bg='white').pack()
         txt = "-Maintenez le clic sur la tuile et déplacez la en \n la" +\
