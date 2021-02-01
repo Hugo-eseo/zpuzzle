@@ -51,7 +51,7 @@ class Application():
         self.cnv_height = int((5/10) * screen_height)
 
         # La hauteur de la frame de commande prend la valeur 4/10 de la hauteur
-        # du canvas, celle des scores 2/20
+        # du canvas, celle des scores 3/20
         self.frame_height = int((4/10) * self.cnv_height)
         self.top_frame_height = int((3/20) * self.cnv_height)
 
