@@ -49,14 +49,9 @@ class Application():
 
         # La hauteur du canvas est égale à 5/10 de la hauteur de l'écran
         self.cnv_height = int((5/10) * screen_height)
-
-        # La hauteur de la frame de commande prend la valeur 4/10 de la hauteur
-        # du canvas, celle des scores 3/20
-        self.frame_height = int((4/10) * self.cnv_height)
+        
+        # La hauteur de la frame des scores 3/20 de la hauteur du canvas
         self.top_frame_height = int((3/20) * self.cnv_height)
-
-        # La hauteur totale de la fenêtre est donc
-        self.height = self.cnv_height + self.frame_height
 
         # On calcul la hauteur d'une pièce
         self.pc_h = int((self.cnv_height - self.top_frame_height)/
@@ -105,12 +100,11 @@ class Application():
                      for j in range(0, self.n_pc_h*self.n_pc_w, self.n_pc_w)]
 
         # Création de la zone de commande du jeu
-        self.frm = tk.Frame(self.wnd, height=self.frame_height,
-                            width=self.cnv_width, bg='green')
-        self.frm.pack_propagate(0)
-        self.frm.pack(side=tk.BOTTOM, expand=True)
+        self.frm = tk.Frame(self.wnd,
+            width=self.cnv_width, bg='green')
+        self.frm.pack(side=tk.BOTTOM, fill=tk.X)
 
-        self.sub_frm = tk.Frame(self.frm, bg='green')
+        self.sub_frm = tk.Frame(self.frm, bg='green', width=self.cnv_width)
         self.sub_frm.pack(side=tk.TOP, pady=self.margin)
 
         # Création de la zone de score
@@ -167,9 +161,9 @@ class Application():
                                width=30, bg='green', fg='white',
                                font=('Franklin Gothic Demi Cond', 12))
         self.chrono_label.pack(side=tk.LEFT, pady=5, padx=5)
-        self.fail_label = tk.Label(self.top_frame, text='', bg='green',
+        self.fail_label = tk.Label(self.sub_frm, text='', bg='green',
             fg='red', font=('Franklin Gothic Demi Cond', 12))
-        self.fail_label.pack_forget()
+        self.fail_label.grid_forget()
 
         # Remise à zéro du chrono
         self.sec = 0
@@ -318,7 +312,7 @@ class Application():
             # On affiche le nombre de pièce mal positionnées
             string = "Nombre d'erreur : " + str(i)
             self.fail_label.config(text=string)
-            self.fail_label.pack(side=tk.LEFT, pady=5, padx=5)
+            self.fail_label.grid(column=1, row=4, sticky='n', pady=5)
             # On désactive les clics
             self.cnv.unbind('<Button-1>')
             self.cnv.unbind('<B1-Motion>')
@@ -341,7 +335,7 @@ class Application():
         self.submit_button.config(text="Soumettre", command=self.submit)
         self.submit_button.grid_forget()
         # On enlève l'affichage du nombre d'erreur
-        self.fail_label.pack_forget()
+        self.fail_label.grid_forget()
         # On réactive les clics :
         self.chrono_on[0] = True
         self.timer()

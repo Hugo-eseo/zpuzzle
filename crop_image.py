@@ -82,8 +82,3 @@ class ImagePuzzle():
             if number > self.dominant_color[0]:
                 self.dominant_color = color
         return self.dominant_color
-
-
-def image_choice(folder):
-    list_images = os.listdir(folder)
-    return random.choice(list_images)
