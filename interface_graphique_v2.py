@@ -785,18 +785,19 @@ class SelectImage():
         # Création de la fenêtre Tkinter et de ses éléments (canva, frames)
         self.win = tk.Tk()
         self.win.title("Selection de l'image")
-        self.win.geometry("1000x400")
+        self.win.geometry("1300x450")
         self.win.resizable(width=False, height=False)  # Pas de fullscreen
 
-        self.frm_left = tk.Frame(self.win, height=800, width=250, bg="white")
+        self.frm_left = tk.Frame(self.win, height=450, width=400, bg="white")
         self.frm_left.pack(side=tk.LEFT)
 
-        self.cnv_middle = tk.Canvas(self.win, height=800, width=500,
+        self.cnv_middle = tk.Canvas(self.win, height=450, width=500,
                                     bg="white", bd=0,
                                     highlightthickness=0, relief='ridge')
+        self.cnv_middle.pack_propagate(0)
         self.cnv_middle.pack(side=tk.LEFT)
 
-        self.frm_right = tk.Canvas(self.win, height=800, width=250, bg="white",
+        self.frm_right = tk.Canvas(self.win, height=450, width=400, bg="white",
                                    bd=0, highlightthickness=0, relief="ridge")
         self.frm_right.pack(side=tk.RIGHT)
 
@@ -817,7 +818,7 @@ class SelectImage():
         # Création du label et des boutons
         txt = "Choisissez l'image avec laquelle vous voulez jouer"
         tk.Label(self.cnv_middle, text=txt, bg='white',
-                 font=('Franklin Gothic Demi Cond', 11)).place(x=105, y=20)
+                 font=('Franklin Gothic Demi Cond', 11)).pack(side=tk.TOP)
         tk.Button(self.frm_right, text='Image suivante',
                   command=self.next_image).place(x=75, y=190)
         tk.Button(self.frm_left, text='Image précédente',
@@ -825,7 +826,7 @@ class SelectImage():
         tk.Button(self.frm_left, text='Retourner à la première image',
                   command=self.first_image).place(x=75, y=230)
         tk.Button(self.cnv_middle, text='Jouer avec cette image',
-                  command=self.begin_game).place(x=180, y=360)
+                  command=self.begin_game).pack(side=tk.BOTTOM, pady=10)
         self.win.mainloop()
 
     def display(self):
